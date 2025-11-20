@@ -38,17 +38,16 @@ import {
 
 // Map of graduation years → WhatsApp group links
 const whatsappGroups = {
-  2017: "https://chat.whatsapp.com/2017-group-link",
-  2018: "https://chat.whatsapp.com/2018-group-link",
-  2019: "https://chat.whatsapp.com/2019-group-link",
-  2020: "https://chat.whatsapp.com/2020-group-link",
-  2021: "https://chat.whatsapp.com/2021-group-link",
-  2022: "https://chat.whatsapp.com/2022-group-link",
-  2023: "https://chat.whatsapp.com/2023-group-link",
-  2024: "https://chat.whatsapp.com/2024-group-link",
-  2025: "https://chat.whatsapp.com/2025-group-link",
-  2026: "https://chat.whatsapp.com/2025-group-link",
-
+  2017: "https://chat.whatsapp.com/DgjvwukYEGB0aL9GciEUUq?mode=hqrt1",
+  2018: "https://chat.whatsapp.com/DavAur7ZWy1CSEYIWiiaRK?mode=hqrt1",
+  2019: "https://chat.whatsapp.com/HP44zwDmCOWCkCDgqxs9Ce?mode=hqrt1",
+  2020: "https://chat.whatsapp.com/D0Po822LOtg99o0dKv0EKL?mode=hqrt1",
+  2021: "https://chat.whatsapp.com/Icmc1ptutlKCXz0B4rdGS5?mode=hqrt1",
+  2022: "https://chat.whatsapp.com/Cox5vfg4DpF0w5u7YHpNkJ?mode=hqrt1",
+  2023: "https://chat.whatsapp.com/JYifhm5Qgch9ygUFMBd0JV?mode=hqrt1",
+  2024: "https://chat.whatsapp.com/LpEBc5bfCsKGbl2NacofpJ?mode=hqrt1",
+  2025: "https://chat.whatsapp.com/EHJKjHZBaWnDVvJWOX9T5M?mode=hqrt1",
+  2027: "https://chat.whatsapp.com/EHJKjHZBaWnDVvJWOX9T5M?mode=hqrt1",
 };
 
 const Profile = () => {
@@ -348,7 +347,7 @@ const Profile = () => {
       <Toaster position="top-right" />
       <Navbar />
 
-      {isWhatsappModalOpen && <div className="fixed bottom-5 max-w-[280px] right-5 z-20 bg-green-500 p-5 pt-2 rounded-xl" >
+      {isWhatsappModalOpen && (user.graduationYear <= 2025 || user.graduationYear === 2027) &&  <div className="fixed bottom-5 max-w-[280px] right-5 z-20 bg-green-500 p-5 pt-2 rounded-xl" >
         <button className="p-1 rounded-xl text-white px-4  text-sm mx-auto block mt-2 bg-[#ffffff2b]" onClick={() => setIsWhatsappModalOpen(false)}>close</button>
         <img className="mt-4 rounded-xl" src="https://cdn.aptoide.com/imgs/c/7/6/c7644008f58970f3d495d2d68958652a_fgraphic.png" alt="" />
 
@@ -698,7 +697,7 @@ const Profile = () => {
  
                   
 
-                   <div className="flex gap-1" >  <EyeIcon />Visibility:
+                   <div className="flex gap-1" >  <EyeIcon />Phone No. :
                      <button onClick={() => ChangeVisibility(!phoneVisible)} className="flex  underline items-center gap-1"  >
                     
 

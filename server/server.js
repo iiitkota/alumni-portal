@@ -21,17 +21,17 @@ const MONGODB_URI = process.env.MONGODB_URI; // MongoDB URI from .env
 
 app.use(express.json());
 const corsOptions = {
-	origin: "http://localhost:5173"
-	// origin: [
-	// 	'https://alumni.iiitkota.ac.in',
-	// 	'https://www.alumni.iiitkota.ac.in',
-	// 	'http://alumni.iiitkota.ac.in',
-	// 	'http://www.alumni.iiitkota.ac.in',
-	// 	'https://*.alumni.iiitkota.ac.in',
-	// 	'http://*.alumni.iiitkota.ac.in',
-	// 	'http://*.iiitkota.ac.in',
-	// 	'https://*.iiitkota.ac.in', 
-	// ]
+	// origin: "http://localhost:5173"
+	origin: [
+		'https://alumni.iiitkota.ac.in',
+		'https://www.alumni.iiitkota.ac.in',
+		'http://alumni.iiitkota.ac.in',
+		'http://www.alumni.iiitkota.ac.in',
+		'https://*.alumni.iiitkota.ac.in',
+		'http://*.alumni.iiitkota.ac.in',
+		'http://*.iiitkota.ac.in',
+		'https://*.iiitkota.ac.in', 
+	]
 	
 	
 	
