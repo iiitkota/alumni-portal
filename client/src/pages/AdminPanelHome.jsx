@@ -5,9 +5,8 @@ import { AdminEvents } from "./AdminEvents";
 import { AlumniList } from "./AdminAlumni";
 axios.defaults.withCredentials = true;
 import axios from "axios";
-
-// let APIHOST = "http://localhost:7034";
-let APIHOST = "https://alumni-api.iiitkota.ac.in"
+ 
+let APIHOST = import.meta.env.VITE_API_URL
 
 
 

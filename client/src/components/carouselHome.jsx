@@ -39,6 +39,12 @@ const carouselHome = () => {
         className="keen-slider lg:h-[78vh] md:h-[65vh] sm:h-[55vh] h-[30vh] mt-[8.375rem] max-w-980:mt-[90px] max-w-492:mt-[58px]"
       >
         <div className="keen-slider__slide flex justify-center items-center">
+          <img src={'/public/assets/homeBanner-6.jpg'} alt="" className="object-fill w-full h-full" />
+        </div>
+        <div className="keen-slider__slide flex justify-center items-center">
+          <img src={'/public/assets/homeBanner-5.jpg'} alt="" className="object-fill w-full h-full" />
+        </div>
+        <div className="keen-slider__slide flex justify-center items-center">
           <img src={Disha} alt="" className=" object-fill w-full h-full" />
         </div>
         <div className="keen-slider__slide flex justify-center items-center">

@@ -2,8 +2,8 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 
 
-// let APIHOST = "http://localhost:5000";
-let APIHOST = "https://alumni-api.iiitkota.ac.in"
+ 
+let APIHOST = import.meta.env.VITE_API_URL
 
 
 function WordEditor({ value, onChange, className }) {

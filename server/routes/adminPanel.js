@@ -39,7 +39,9 @@ const loginLimiter = rateLimit({
 
 
 // api/admin/login
-router.post("/login", loginLimiter, async (req,res)=>{
+router.post("/login",  async (req,res)=>{
+
+  
   const {key} = req.body;
 
   if (!key) {
@@ -56,7 +58,7 @@ router.post("/login", loginLimiter, async (req,res)=>{
       httpOnly: true,
       sameSite: "Strict",
       secure: process.env.NODE_ENV === 'production', // IMPORTANT: set to true in production
-      maxAge: 60 * 60 * 1000
+      maxAge: TOKEN_EXPIRY_MS
     });
 
     return res.json({ success: true });

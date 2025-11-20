@@ -7,9 +7,8 @@ import { ClassNames } from '@emotion/react';
 
 
 
-let APIHOST = "https://alumni-api.iiitkota.ac.in"
-
-// let APIHOST = "http://localhost:7034";
+let APIHOST = import.meta.env.VITE_API_URL
+ 
 
 function WordEditor({ value, onChange, className }) {
   const editorRef = useRef();

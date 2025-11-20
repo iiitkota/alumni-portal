@@ -12,6 +12,8 @@ import Avatar from "../assets/avatar.png"
 import axios from "axios";
 import { Modal, Box, Button, Typography } from "@mui/material";
 
+let APIHOST = import.meta.env.VITE_API_URL
+
 const TopLayer = () => {
 	const [user, setUser] = useState(null);
 	const [error, setError] = useState(null);
@@ -26,7 +28,7 @@ const TopLayer = () => {
 			const fetchUser = async () => {
 				try {
 					const response = await axios.get(
-						"https://alumni-api.iiitkota.ac.in/api/profile/me",
+						`${APIHOST}/api/profile/me`,
 						{
 							headers: { Authorization: `Bearer ${token}` },
 						}

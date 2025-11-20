@@ -8,8 +8,8 @@ import CarouselEvents from "../components/CarouselEvents";
 import axios from "axios";
 
 
-// let APIHOST = "http://localhost:7034";
-let APIHOST = "https://alumni-api.iiitkota.ac.in"
+ 
+let APIHOST = import.meta.env.VITE_API_URL
 
 const EventDetails = () => {
 	const { title } = useParams();
