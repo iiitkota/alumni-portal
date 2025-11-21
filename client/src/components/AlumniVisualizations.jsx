@@ -22,6 +22,11 @@ import {
 } from "chart.js";
 import CloseIcon from "@mui/icons-material/Close";
 
+
+let APIHOST = import.meta.env.VITE_API_URL
+
+
+
 // Register Chart.js components
 ChartJS.register(
 	CategoryScale,
@@ -48,7 +53,7 @@ const AlumniVisualizations = ({ isOpen, onClose }) => {
 
 					// Fetch all alumni data from the new endpoint
 					const response = await axios.get(
-						"https://alumni-api.iiitkota.ac.in/api/alumni/all"
+						`${APIHOST}/api/alumni/all`
 					);
 					const alumniData = response.data.alumni; // Access the 'alumni' key
 

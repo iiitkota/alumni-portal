@@ -8,6 +8,9 @@ import Footer from "../components/Footer.jsx";
 import Avatar from "../assets/avatar.png";
 import toast, { Toaster } from 'react-hot-toast';
 
+let APIHOST = import.meta.env.VITE_API_URL
+
+
 import {
   Button,
   TextField,
@@ -29,10 +32,32 @@ import {
   EmojiEvents as EmojiEventsIcon,
   Share as Share,
   Delete as DeleteIcon,
+  RemoveRedEye as EyeIcon
 } from "@mui/icons-material";
 
+
+// Map of graduation years → WhatsApp group links
+const whatsappGroups = {
+  2017: "https://chat.whatsapp.com/DgjvwukYEGB0aL9GciEUUq?mode=hqrt1",
+  2018: "https://chat.whatsapp.com/DavAur7ZWy1CSEYIWiiaRK?mode=hqrt1",
+  2019: "https://chat.whatsapp.com/HP44zwDmCOWCkCDgqxs9Ce?mode=hqrt1",
+  2020: "https://chat.whatsapp.com/D0Po822LOtg99o0dKv0EKL?mode=hqrt1",
+  2021: "https://chat.whatsapp.com/Icmc1ptutlKCXz0B4rdGS5?mode=hqrt1",
+  2022: "https://chat.whatsapp.com/Cox5vfg4DpF0w5u7YHpNkJ?mode=hqrt1",
+  2023: "https://chat.whatsapp.com/JYifhm5Qgch9ygUFMBd0JV?mode=hqrt1",
+  2024: "https://chat.whatsapp.com/LpEBc5bfCsKGbl2NacofpJ?mode=hqrt1",
+  2025: "https://chat.whatsapp.com/EHJKjHZBaWnDVvJWOX9T5M?mode=hqrt1",
+  2027: "https://chat.whatsapp.com/EHJKjHZBaWnDVvJWOX9T5M?mode=hqrt1",
+};
+
 const Profile = () => {
+
+  const [isWhatsappModalOpen, setIsWhatsappModalOpen] = useState(true); // opens on load
+
+  const closeWhatsappModal = () => setIsWhatsappModalOpen(false);
+
   const { id } = useParams();
+  const [phoneVisible, setphoneVisible] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useState({
     name: "",
@@ -89,17 +114,21 @@ const Profile = () => {
         return;
       }
 
+
+
       const fetchUser = async () => {
         try {
           const endpoint = id === "me" ? `/profile/me` : `/profile/${id}`;
+          console.log(id)
           const response = await axios.get(
-            `https://alumni-api.iiitkota.ac.in/api${endpoint}`,
+            `${APIHOST}/api${endpoint}`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
           setUser(response.data);
           setLoading(false);
+
         } catch (error) {
           setError(error.message);
           setLoading(false);
@@ -107,10 +136,60 @@ const Profile = () => {
       };
 
       fetchUser();
+
+
     } else {
       setLoading(false);
     }
   }, [id, token, navigate]);
+
+  const fetchPref = async (instituteId) => {
+    try {
+      const response = await axios.get(
+        `${APIHOST}/api/profile/preference`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { instituteId }
+        }
+      );
+
+      console.log("here is the new req:", user)
+      console.log(response.data.data.phoneVisible)
+
+      setphoneVisible(response.data.data.phoneVisible)
+
+    } catch (error) {
+      console.log(error, "sdsdsdsd")
+    }
+  }
+
+  const ChangeVisibility = async (visible) => {
+    try {
+      const response = await axios.post(
+        `${APIHOST}/api/profile/preference`,
+        {
+          instituteId: user.instituteId,
+          phoneVisible: visible
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+
+      )
+
+      console.log(response.data)
+
+      setphoneVisible(prev => !prev)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    if (user && user.instituteId) {
+      fetchPref(user.instituteId);
+    }
+  }, [user]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -268,6 +347,22 @@ const Profile = () => {
       <Toaster position="top-right" />
       <Navbar />
 
+      {isWhatsappModalOpen && (user.graduationYear <= 2025 || user.graduationYear === 2027) &&  <div className="fixed bottom-5 max-w-[280px] right-5 z-20 bg-green-500 p-5 pt-2 rounded-xl" >
+        <button className="p-1 rounded-xl text-white px-4  text-sm mx-auto block mt-2 bg-[#ffffff2b]" onClick={() => setIsWhatsappModalOpen(false)}>close</button>
+        <img className="mt-4 rounded-xl" src="https://cdn.aptoide.com/imgs/c/7/6/c7644008f58970f3d495d2d68958652a_fgraphic.png" alt="" />
+
+        <h1 className="font-medium mt-4 text-xl text-center text-white" >Join {user.graduationYear} Batch WhatsApp Community Now</h1>
+
+        <div className="flex justify-center gap-2">
+          <a className="p-2 rounded-2xl  px-4 inline-block mt-2 bg-white " href={`${whatsappGroups[user.graduationYear]}`}>Join Now</a>
+
+
+
+
+        </div>
+      </div>}
+
+
       {/* Edit Profile Modal */}
       <Dialog open={isModalOpen} onClose={closeModal} fullWidth maxWidth="md">
         <DialogTitle>Edit Profile</DialogTitle>
@@ -368,7 +463,7 @@ const Profile = () => {
               onChange={handleChange}
               fullWidth
             />
-             <TextField
+            <TextField
               margin="dense"
               label="Phone Number"
               name="phoneNumber"
@@ -589,9 +684,43 @@ const Profile = () => {
               <EmailIcon />
               <a href={`mailto:${user.personalEmail}`} className="truncate">{user.personalEmail}</a>
             </div>
-            <div className="h-[2rem] w-full flex gap-2">
-              <PhoneIcon />
-              <p>{user.phoneNumber}</p>
+            <div className={` ${id != "me" && phoneVisible == false ? "hidden" : ''} h-[2rem] w-full flex gap-2`}>
+
+              {
+                id == "me" ?
+
+                  <div className="flex items-center gap-4" >
+                    <div className="flex gap-1" >
+                      <PhoneIcon />
+                      <p>{user.phoneNumber}</p>
+                    </div>
+ 
+                  
+
+                   <div className="flex gap-1" >  <EyeIcon />Phone No. :
+                     <button onClick={() => ChangeVisibility(!phoneVisible)} className="flex  underline items-center gap-1"  >
+                    
+
+                      {phoneVisible == true ? "Public" : "Private"}
+
+                    </button>
+                   </div>
+
+                  </div>
+
+                  :
+
+
+                  <div>
+
+                    {phoneVisible == false ? '' : <div className="flex gap-2" > <PhoneIcon />
+                      <p>{user.phoneNumber}</p> </div>}
+
+
+                  </div>
+              }
+
+
             </div>
             <div className="h-[2rem] w-full flex gap-2">
               <HomeIcon />

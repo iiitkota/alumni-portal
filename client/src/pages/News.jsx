@@ -7,10 +7,8 @@ import { TextField, InputAdornment, IconButton, Button } from "@mui/material";
 import { Search, ArrowForward } from "@mui/icons-material";
 import axios from 'axios'
 // import newsData from "../data/newsData.json";
-
-
-// let APIHOST = "http://localhost:7034";
-let APIHOST = "https://alumni-api.iiitkota.ac.in"
+ 
+let APIHOST = import.meta.env.VITE_API_URL
 
 
 const News = () => {
@@ -27,6 +25,7 @@ const News = () => {
 
     const fetchNews = async () => {
       try{
+        console.log("Trying fetch req to APIHOST  ", APIHOST)
         const res = await axios.get(`${APIHOST}/api/admin/news`);
         const rawNews = res.data.news;
 

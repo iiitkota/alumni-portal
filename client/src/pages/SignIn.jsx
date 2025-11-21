@@ -4,6 +4,9 @@ import Logo from "../assets/iiitkotalogo.png";
 import { toast, Toaster } from "react-hot-toast"; // Import from react-hot-toast
 import axios from "axios";
 
+let APIHOST = import.meta.env.VITE_API_URL
+
+
 function SignIn() {
   const [formData, setFormData] = useState({
     instituteId: "",
@@ -31,8 +34,7 @@ function SignIn() {
 
     try {
       const response = await axios.post(
-        // "http://localhost:5000/api/auth/signin", // Update with your API endpoint
-        "https://alumni-api.iiitkota.ac.in/api/auth/signin", // Update with your API endpoint
+        `${APIHOST}/api/auth/signin`, // Update with your API endpoint
         formData,
         {
           headers: {

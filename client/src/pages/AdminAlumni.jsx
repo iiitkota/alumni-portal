@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 
 import axios from "axios";
 
-// "https://alumni-api.iiitkota.in/api/admin/alumni", 
-let APIHOST = "https://alumni-api.iiitkota.ac.in"
-// let APIHOST = "http://localhost:5000";
-
+let APIHOST = import.meta.env.VITE_API_URL
 
 
 import jsPDF from "jspdf";

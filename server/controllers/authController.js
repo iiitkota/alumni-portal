@@ -138,7 +138,7 @@ exports.signIn = async (req, res) => {
   try {
     const user = await User.findOne({ instituteId });
 
-    if (!user) {
+    if (!user) { 
       return res.status(400).json({ message: 'Invalid institute ID or password' });
     }
 
@@ -157,6 +157,7 @@ exports.signIn = async (req, res) => {
 
     res.json({ token });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error' });
   }
 };

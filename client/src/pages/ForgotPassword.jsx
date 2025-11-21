@@ -2,17 +2,30 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import axios from "axios";
+let APIHOST = import.meta.env.VITE_API_URL
+
+
 
 function ForgotPassword() {
   const [input, setInput] = useState(""); // Accepts either instituteId or email format
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // const extractInstituteId = (inputValue) => {
+  //   // If input is already in the format "instituteId@iiitkota.ac.in", extract only instituteId
+  //   return inputValue.toLowerCase().includes("@iiitkota.ac.in")
+  //     ? inputValue.split("@")[0] // Extract "2022kucp1077" from "2022kucp1077@iiitkota.ac.in"
+  //     : inputValue; // Otherwise, return as is
+  // };
+
   const extractInstituteId = (inputValue) => {
-    // If input is already in the format "instituteId@iiitkota.ac.in", extract only instituteId
-    return inputValue.includes("@iiitkota.ac.in")
-      ? inputValue.split("@")[0] // Extract "2022kucp1077" from "2022kucp1077@iiitkota.ac.in"
-      : inputValue; // Otherwise, return as is
+    const value = inputValue.trim().toLowerCase();
+
+    if (value.endsWith("@iiitkota.ac.in")) {
+      return value.split("@")[0];
+    }
+
+    return value;
   };
 
   const handleSubmit = async (e) => {
@@ -23,7 +36,7 @@ function ForgotPassword() {
 
     try {
       await axios.post(
-        "https://alumni-api.iiitkota.ac.in/api/password/forgot-password",
+        `${APIHOST}/api/password/forgot-password`,
         { instituteId }, // Sending only the extracted instituteId
         { headers: { "Content-Type": "application/json" } }
       );
@@ -43,7 +56,7 @@ function ForgotPassword() {
 
   return (
     <div className="w-screen h-screen flex justify-center items-center bg-[#1A1C4E]">
-      <div><Toaster position="top-right"/></div>
+      <div><Toaster position="top-right" /></div>
       <div className="md:w-[85%] md:h-auto w-[95%] h-auto max-w-md bg-white rounded-2xl shadow-2xl p-8">
         <h2 className="text-3xl font-semibold text-center text-[#32325D] mb-6">
           Forgot Password

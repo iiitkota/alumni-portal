@@ -9,8 +9,8 @@ import AnalyticsIcon from "@mui/icons-material/Analytics";
 import CloseIcon from "@mui/icons-material/Close";
 import Loader from "../components/Loader";
 
-// let APIHOST = "http://localhost:7034";
-let APIHOST = "https://alumni-api.iiitkota.ac.in"
+ 
+let APIHOST =  import.meta.env.VITE_API_URL
 
 
 // Shared Modal for image preview

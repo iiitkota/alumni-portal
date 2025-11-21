@@ -20,7 +20,7 @@ import Prachi from "../assets/prachiGupta.png"
 const profiles = [
   {
     name: "Hiteshwar Kaushik",
-    occupation: "4rth Year CSE",
+    occupation: "4th Year CSE",
     image: Hiteshwar,
     linkedin: "https://www.linkedin.com/in/hiteshwarkaushik/",
     github: "https://www.github.com/coderkaushik",
@@ -28,7 +28,7 @@ const profiles = [
   },
   {
     name: "Partik Malasi",
-    occupation: "4rth Year CSE",
+    occupation: "4th Year CSE",
     image: Partik,
     linkedin: "https://www.linkedin.com/in/partik-malasi-736686249/",
     github: "https://github.com/PartikMalasi",
@@ -36,7 +36,7 @@ const profiles = [
   },
   {
     name: "Kratin Aggrawal",
-    occupation: "4rth Year CSE",
+    occupation: "4th Year CSE",
     image: Kratin,
     linkedin: "https://www.linkedin.com/in/kratin-aggarwal-691157257/",
     github: "https://www.github.com/coderkaushik",

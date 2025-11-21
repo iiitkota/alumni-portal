@@ -5,6 +5,8 @@ const streamifier = require('streamifier');
 const router = express.Router();
 const Profile = require('../models/User.js'); // Adjust the path to your Profile model
 const authMiddleware = require('../middlewares/authMiddleware'); // Ensure you have a middleware to verify JWTs
+const Preference = require('../models/Preference.js');
+
 
 // Configure multer
 const storage = multer.memoryStorage();
@@ -16,6 +18,53 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+
+router.post('/preference', authMiddleware, async (req, res) => {
+
+
+  try {
+
+    const { instituteId, phoneVisible } = req.body;
+
+    const Pref = await Preference.updateOne({ instituteId: instituteId }, { $set: { phoneVisible: phoneVisible } }, { upsert: true })
+
+    if (!Pref) {
+      res.status(404).json({ message: "Not found" })
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: Pref
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server Error", error: err.message })
+
+  }
+
+})
+
+router.get('/preference', authMiddleware, async (req, res) => {
+  try {
+    const { instituteId } = req.query;
+
+    const pref = await Preference.findOneAndUpdate({ instituteId }, {}, { upsert: true, new: true, setDefaultsOnInsert: true })
+
+    return res.status(200).json({
+      success: true,
+      data: pref
+    })
+
+  } catch (err) {
+
+    res.send(500).json({ message: "server error", error: err.message })
+
+  }
+
+
+})
+
 
 // Get the currently logged-in user's profile
 router.get('/me', authMiddleware, async (req, res) => {

@@ -106,7 +106,7 @@ const SignUp = () => {
     }
 
     // if the user is passing out in 2026 or later, give him an alert message saying he cannot
-    if (parseInt(formData.graduationYear) >= 2027) {
+    if (parseInt(formData.graduationYear) >= 2028) {
       alert("Registration is not allowed for students graduating in 2026 or later.");
       return false;
     }
@@ -289,7 +289,7 @@ const SignUp = () => {
           <option value="" disabled>
             Select Graduation Year
           </option>
-          {Array.from({ length: 9 }, (_, i) => 2017 + i).map((year) => (
+          {Array.from({ length: 15 }, (_, i) => 2017 + i).map((year) => (
             <option key={year} value={year}>
               {year}
             </option>
