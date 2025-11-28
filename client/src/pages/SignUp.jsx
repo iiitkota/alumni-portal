@@ -106,8 +106,8 @@ const SignUp = () => {
     }
 
     // if the user is passing out in 2026 or later, give him an alert message saying he cannot
-    if (parseInt(formData.graduationYear) >= 2028) {
-      alert("Registration is not allowed for students graduating in 2026 or later.");
+    if (parseInt(formData.graduationYear) >= 2027) {
+      alert("Registration is not allowed for students graduating in 2027 or later.");
       return false;
     }
 
@@ -254,9 +254,9 @@ const SignUp = () => {
           required
           className="w-full md:w-4/5 px-4 py-3 border border-[#0E407C] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0E407C]"
         />
-        
+
       </div>
-        <p className="ml-10 mt-1  text-sm mb-6">Please enter Student ID not Institute Email ID</p>
+      <p className="ml-10 mt-1  text-sm mb-6">Please enter Student ID not Institute Email ID</p>
       <div className="mb-6 w-full flex items-center max-md:justify-center">
         <ComputerIcon className="text-[#19194D] mr-2" />
         <select
@@ -547,9 +547,25 @@ const SignUp = () => {
 
     }
 
+    if (currentDiv == 3) {
+      if (!formData.role.trim()) {
+        toast.error('Please fill your role');
+        return;
+      }
+
+      if (!formData.currentCompany.trim()) {
+        toast.error('Please fill your current company');
+        return;
+      }
+
+
+    }
+
     if (currentDiv < divs.length - 1) {
       setCurrentDiv(currentDiv + 1);
     }
+
+
   };
 
   const prevDiv = () => {
