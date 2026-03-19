@@ -31,13 +31,18 @@ const sendEmail = (personalEmail, name, instituteId, password) => {
     subject: 'Welcome to the Alumni Cell! Your Login Credentials Inside',
     text: `Dear ${name},
 
-We are excited to welcome you to the IIIT Kota Alumni Cell. We are currently working on a dedicated Alumni Cell website that will help you stay connected with fellow alumni. Below are your login credentials, which you will use once the website is ready.
+We are excited to welcome you to the IIIT Kota Alumni Cell.
+
+Our dedicated Alumni Cell website is now live, designed to help you stay connected with fellow alumni and remain engaged with the institute.
+
+Below are your login credentials, which you can use to access the portal:
 
 Username: ${instituteId}
 Password: ${password}
 
-Once the website is live, you will be able to log in using these credentials to explore features, connect with alumni, and stay updated on events.
+Once logged in, you will be able to explore various features, connect with other alumni, and stay updated on alumni events, announcements, and initiatives.
 
+We look forward to your active participation in the IIIT Kota alumni community.
 If you have any questions, feel free to contact us at alumni@iiitkota.ac.in.
 
 Best regards,
