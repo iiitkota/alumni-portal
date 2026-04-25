@@ -472,6 +472,7 @@ const SignUp = () => {
             <input
               type="file"
               id="file-input"
+              name="profilePicture"
               className="absolute inset-0 opacity-0 cursor-pointer"
               onChange={handleFileChange}
             />

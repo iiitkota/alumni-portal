@@ -3,6 +3,7 @@ import Logo from "../assets/iiitkotalogo.png";
 import { NewsList } from "./AdminNews";
 import { AdminEvents } from "./AdminEvents";
 import { AlumniList } from "./AdminAlumni";
+import { AdminStories } from "./AdminStories";
 axios.defaults.withCredentials = true;
 import axios from "axios";
  
@@ -28,7 +29,7 @@ function TabButton({ label, isActive, onClick }) {
 
 export default function AdminPanelHome() {
   const [page, setPage] = useState("Home");
-  const pages = ["Home", "News", "Events"];
+  const pages = ["Home", "News", "Events", "Stories"];
 
   const [auth, setAuth] = useState(false);
   const [key, setKey] = useState("");
@@ -37,7 +38,7 @@ export default function AdminPanelHome() {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get(`${APIHOST}/api/admin/protected`);
+      const res = await axios.get(`${APIHOST}/api/admin/protected` );
       setAuth(res.data.access);
     } catch {
       setAuth(false);
@@ -53,10 +54,12 @@ export default function AdminPanelHome() {
       if (res.data.success) {
         await checkAuth();
       } else {
-        alert(  res.data.message);
+        alert(res.data.message);
       }
-    } catch {
-      alert("Login Failed");
+    } catch (error) { 
+      console.error(error)
+
+      alert("Login Failed" );
     }
   };
 
@@ -141,6 +144,7 @@ export default function AdminPanelHome() {
       {page === "Home" && <AlumniList />}
       {page === "News" && <NewsList />}
       {page === "Events" && <AdminEvents />}
+      {page === "Stories" && <AdminStories />}
     </div>
   );
 }

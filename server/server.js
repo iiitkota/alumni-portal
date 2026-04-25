@@ -1,10 +1,14 @@
+// Polyfill for SlowBuffer which was removed in recent Node versions (legacy dependency compatibility)
+const bufferModule = require('buffer');
+if (!bufferModule.SlowBuffer) {
+  bufferModule.SlowBuffer = bufferModule.Buffer;
+}
 require("dotenv").config(); // Load environment variables
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require('path');
 const cookieParser = require("cookie-parser");
-
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -13,7 +17,8 @@ const profileRoute = require("./routes/profileRoute"); // Ensure this is the cor
 const passwordRoutes = require("./routes/passwordRoutes"); // Import the password routes
 const verificationRoutes = require("./routes/verificationRoutes"); // Add this line
 
-const adminPanel = require("./routes/adminPanel")
+const adminPanel = require("./routes/adminPanel");
+const storyRoutes = require("./routes/storyRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 7034;
@@ -21,8 +26,9 @@ const MONGODB_URI = process.env.MONGODB_URI; // MongoDB URI from .env
 
 app.use(express.json());
 const corsOptions = {
-	// origin: "http://localhost:5173"
 	origin: [
+
+ 
 		'https://alumni.iiitkota.ac.in',
 		'https://www.alumni.iiitkota.ac.in',
 		'http://alumni.iiitkota.ac.in',
@@ -76,7 +82,8 @@ app.use("/api/register", require("./routes/register"));
 
 
 
-app.use("/api/admin", adminPanel)
+app.use("/api/admin", adminPanel);
+app.use("/api/stories", storyRoutes);
 
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
