@@ -1,0 +1,17 @@
+services:
+  api:
+    build: .
+    container_name: alumni-portal-api
+    ports:
+      - "9000:7034"
+    env_file:
+      - .env
+    environment:
+      - PORT=7034
+      - NODE_ENV=production
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.30'
+          memory: 126M

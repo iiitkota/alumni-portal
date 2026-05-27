@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Gaurav Parmar",
+    "description": "Gaurav Parmar, a 2023 CSE graduate from IIIT Kota, is a software developer at Flipkart x Cleartrip. He specializes in Core Java, Node.js, and React.js, contributing to feature development, bug fixes, and delivering high-quality e-commerce solutions.",
+    "imageUrl": "../assets/gaurav_parmar.jpeg",
+    "bd": "Bachelor of Technology in Computer Science and Engineering, 2023"
+  },
+  {
+    "name": "Omkar Deshmukh",
+    "description": "Omkar Deshmukh is a 2023 CSE graduate from IIIT Kota, is a Software Engineer at Google. With a passion for problem-solving, competitive programming, and cybersecurity, he has previously contributed to X80 Security and the Google Workspace Security team. Omkar is also dedicated to DSA content development and coaching, helping others excel in coding interviews.",
+    "imageUrl": "../assets/omkar_deshmukh.jpeg",
+    "bd": "Bachelor of Technology in Computer Science and Engineering, 2023"
+  },
+  {
+    "name": "Gaurav Agarwal Luhariwala",
+    "description": "Gaurav Agarwal Luhariwala is a creative and structured thinker who thrives in 0 to 1 roles. A self-proclaimed Shameless Jugadu, he enjoys connecting with people, solving problems, and focusing on execution and distribution. Outside of work, he loves long rides, discovering music, and hiking.",
+    "imageUrl": "../assets/gaurav_agarwal_luhariwala.jpeg",
+    "bd": "Bachelor of Technology in Computer Science and Engineering, 2023"
+  },
+  {
+    "name": "Ankur Agarwal",
+    "description": "Ankur Agarwal, a gold medalist from the CSE 2024 batch at IIIT Kota, is a Software Engineer - IC3 at Coinbase. A MERN stack developer passionate about leadership, community management, and competitive programming, Ankur is committed to continuous self-improvement. He also enjoys music and playing the piano in his free time.",
+    "imageUrl": "../assets/ankur_agarwal.jpeg",
+    "bd": "Bachelor of Technology in Computer Science and Engineering, 2024"
+  },
+  {
+    "name": "Yashash Jain",
+    "description": "Yashash Jain, a 2021 ECE graduate from IIIT Kota, is currently a Scientist at SAC, ISRO. With an M.Tech in Microelectronics and VLSI Design from IISc Bangalore, his interests lie in ASIC Design, hardware security, and quantum computing. Yashash is passionate about continuous learning and expanding his expertise.",
+    "imageUrl": "../assets/yashash_jain.jpeg",
+    "bd": "Bachelor of Technology in Electronics and Communication Engineering, 2021"
+  },
+  {
+    "name": "Ashpreet Kaur",
+    "description": "Ashpreet Kaur, an ECE 2024 graduate from IIIT Kota, is a Software Engineer at Google. A former Google STEP intern, she is passionate about coding, collaboration, and leveraging technology to create positive impacts. Ashpreet is eager to connect with fellow tech enthusiasts and explore innovative solutions.",
+    "imageUrl": "../assets/ashpreet_kaur.jpeg",
+    "bd": "Bachelor of Technology in Electronics and Communication Engineering, 2024"
+  },
+  {
+    "name": "Vibhor Rawal",
+    "description": "Vibhor Rawal is a 2021 Computier Science and Engineering graudate from IIIT Kota. He is currently working as a Software Engineer at Google. He has worked at Gameskraft and Amazon as well. He is passionate about coding and loves to solve problems.",
+    "imageUrl": "../assets/vibhor_rawal.jpeg",
+    "bd": "Bachelor of Technology in Computer Science and Engineering, 2021"
+  },
+  {
+    "name": "Joey Pinto",
+    "description": "Joey Pinto holds a Master's degree in Software Engineering from Carnegie Mellon University, Silicon Valley, graduated in May 2019. Specializing in Cloud Computing, Distributed Systems, and Web Services, he has a strong passion for automation, testing, and debugging.",
+    "imageUrl": "../assets/joey_pinto.jpeg",
+    "bd": "Bachelor of Technology in Computer Science and Engineering, 2017"
+  }
+]

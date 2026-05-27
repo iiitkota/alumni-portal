@@ -1,0 +1,24 @@
+{
+	"Innovative Tech Symposium 2024": [
+		"../assets/14.webp",
+		"../assets/15.webp",
+		"../assets/16.webp",
+        "../assets/iiitkotalogo.png"
+	],
+	"Annual Developer Summit": [
+        "../assets/iiitkotalogo.png",
+		"../assets/14.webp",
+		"../assets/15.webp",
+		"../assets/16.webp"
+	],
+	"AI & Machine Learning Workshop": [
+		"../assets/14.webp",
+		"../assets/15.webp",
+		"../assets/16.webp"
+	],
+	"Digital Transformation Expo": [
+		"../assets/14.webp",
+		"../assets/15.webp",
+		"../assets/16.webp"
+	]
+}

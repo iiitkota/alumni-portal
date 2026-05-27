@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "title": "IEEE Publication Announcement",
+    "content": "<p>Aman Vashistha, Software Engineer at Google and IIIT Kota alumnus, proudly announced the publication of a research paper titled 'An Efficient Image Contrast Enhancement using Segmentation in Genetic Algorithm for Remote Sensing Applications' in IEEE.</p><br /><p>The research, co-authored with Omkar Deshmukh and ADARSH GUPTA, and mentored by Ajay Nehra and Gyan Singh Yadav, introduces an optimized histogram equalization technique using genetic algorithms for enhancing remote sensing images. The proposed method achieved a 3–5% improvement over traditional techniques.</p><br /><p>Check out the paper: <a href='https://lnkd.in/g2tc2yrM'>IEEE Paper</a></p>",
+    "postedOn": "2024-11-12"
+  },
+  {
+    "id": "2",
+    "title": "Startups 101: Exposure & Opportunities",
+    "content": "<p>On December 12th, 2024, IIIT Kota hosted 'Startups 101' with Gaurav Agarwal Luhariwala, a 2019-2023 alumnus and Y Combinator-backed entrepreneur.</p><br /><p>Gaurav shared his inspiring journey of building an AI-driven startup, raising half a million dollars, and securing a spot in Y Combinator. He discussed the startup ecosystem, funding challenges, and entrepreneurship as a career path. His story motivated students to explore innovation and entrepreneurship as viable opportunities, embodying the spirit of IIIT Kota.</p>",
+    "postedOn": "2024-12-12"
+  },
+  {
+    "id": "3",
+    "title": "Team Twix from IIIT Kota Wins Odoo Hackathon 2024",
+    "content": "<p>Team Twix from IIIT Kota emerged as the champions at the Odoo Hackathon 2024, organized by IIT Gandhinagar. The team, consisting of Mehak Verma, Vaibhav Lachhwani, Anshika Gochar, and Parth Sharma, outshone over 900+ teams to win the top spot.</p><br /><p>They were recognized for their innovative solution addressing mental health and wellness issues, showcasing their technical skills and problem-solving abilities. Congratulations to Team Twix on this remarkable achievement!</p>",
+    "postedOn": "2024-12-05"
+  },
+  {
+    "id": "4",
+    "title": "Placement Insights with Vibhor Rawal from Google",
+    "content": "<p>On November 9th, 2024, the Alumni Cell at IIIT Kota organized 'Placement Insights,' featuring Vibhor Rawal, a 2021 alumnus and Software Development Engineer at Google.</p><br /><p>Vibhor shared his inspiring journey from IIIT Kota to Google, emphasizing the importance of technical skills, problem-solving, and a proactive approach to learning. His insights into cracking tech interviews and the skills needed for placements were invaluable to students preparing for their own career journeys.</p><br /><p>Vibhor also discussed industry-relevant skills that set candidates apart, focusing on data structures, algorithms, and system design, providing students with the tools to excel in placements.</p><br /><p>The session concluded with a Q&A, allowing students to gain personalized advice on internships, placements, and career growth.</p>",
+    "postedOn": "2024-11-09"
+  },
+  {
+    "id": "5",
+    "title": "Placement Pathway: Guiding Students to Big Tech",
+    "content": "<p>On January 20, 2024, IIIT Kernel hosted an insightful session at IIIT Kota Auditorium with Mr. Ayush Kumar Singh, a Senior Software Engineer at Arcesium and IIIT Kota alumnus.</p><br /><p>He shared his professional journey and emphasized mastering Data Structures and Algorithms (DSA) for success in software engineering. Students gained valuable tips on internships, placements, and career growth. The interactive Q&A session furthered discussion on these key topics, making the event a success.</p>",
+    "postedOn": "2024-01-20"
+  },
+  {
+    "id": "6",
+    "title": "Research Trajectory with ISRO Scientist",
+    "content": "<p>The Alumni Cell of IIIT Kota organized 'Research Trajectory' on October 5, 2024, featuring Yashash Jain, an ISRO Scientist and alumnus. He shared guidance on GATE preparation, career strategies, and personal growth.</p><br /><p>Yashash emphasized revision, practice, and mental well-being, inspiring students to excel. The event concluded with a Q&A on GATE, internships, and ISRO placements, leaving students motivated.</p>",
+    "postedOn": "2024-10-05"
+  }
+]

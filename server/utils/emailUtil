@@ -1,0 +1,62 @@
+// backend/utils/emailUtil.js
+const nodemailer = require('nodemailer');
+require('dotenv').config();
+
+// Create a transporter object using SMTP transport
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Function to send verification email
+const sendVerificationEmail = (to, subject, html) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    html,
+  };
+
+  return transporter.sendMail(mailOptions);
+};
+
+// Function to send welcome email
+const sendEmail = (personalEmail, name, instituteId, password) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: `${personalEmail}`,
+    subject: 'Welcome to the Alumni Cell! Your Login Credentials Inside',
+    text: `Dear ${name},
+
+We are excited to welcome you to the IIIT Kota Alumni Cell.
+
+Our dedicated Alumni Cell website is now live, designed to help you stay connected with fellow alumni and remain engaged with the institute.
+
+Below are your login credentials, which you can use to access the portal:
+
+Username: ${instituteId}
+Password: ${password}
+
+Once logged in, you will be able to explore various features, connect with other alumni, and stay updated on alumni events, announcements, and initiatives.
+
+We look forward to your active participation in the IIIT Kota alumni community.
+If you have any questions, feel free to contact us at alumni@iiitkota.ac.in.
+
+Best regards,
+
+Chetna Sharma, PhD
+Associate Dean, Alumni and Industry Outreach
+Assistant Professor, ECE Department
+Indian Institute of Information Technology, Kota
+(An Institute of National Importance established by MoE, Govt of India)
+Email: chetna.ece@iiitkota.ac.in
+Contact No.: 9549650234`,
+  };
+
+  return transporter.sendMail(mailOptions);
+};
+
+module.exports = { sendEmail, sendVerificationEmail };

@@ -1,0 +1,40 @@
+{
+	"jobCards": [
+		{
+			"id": "",
+			"title": "",
+			"company": "",
+			"location": "",
+			"description": "",
+			"about": "",
+			"skills": "",
+			"experience": "",
+			"deadline": "",
+			"postedBy": {
+				"name": "",
+				"picture": "",
+				"batch": "",
+				"currentPosition": ""
+			}
+		}
+	],
+	"internCards": [
+		{
+			"id": "",
+			"title": "",
+			"company": "",
+			"location": "",
+			"description": "",
+			"skills": "",
+			"experience": "",
+			"deadline": "",
+			"postedBy": {
+				"name": "",
+				"picture": "",
+				"batch": "",
+				"currentPosition": ""
+			}
+		}
+	]
+}
+

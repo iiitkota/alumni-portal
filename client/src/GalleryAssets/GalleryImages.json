@@ -1,0 +1,63 @@
+[
+    {
+        "groupName": "Research Trajectory",
+        "urls": [
+            "../assets/research_trajectory_1.jpg",
+            "../assets/research_trajectory_2.jpg",
+            "../assets/research_trajectory_3.jpg",
+            "../assets/research_trajectory_4.jpg"
+        ]
+    },
+    {
+        "groupName": "Placement Pathway: Guiding Students to Big Tech",
+        "urls": [
+            "../assets/placement_pathway_1.jpg",
+            "../assets/placement_pathway_2.jpg",
+            "../assets/placement_pathway_3.jpg"
+        ]
+    },
+    {
+        "groupName": "LinkedIn Linkup Challenge: Fostering Connections and Career Growth",
+        "urls": [
+            "../assets/linkedin_linkup_challenge_2.jpg",
+            "../assets/linkedin_linkup_challenge_1.jpg",
+            "../assets/linkedin_linkup_challenge_3.jpg",
+            "../assets/research_trajectory_4.jpg"
+        ]
+    },
+    {
+        "groupName": "IIM Unveiled – Expert Talk",
+        "urls": [
+            "../assets/iim_unvieled_2.jpg",
+            "../assets/iim_unvieled_1.jpg",
+            "../assets/iim_unvieled_3.jpg"
+        ]
+    },
+    {
+        "groupName": "DISHA: An Insightful Speaker Session",
+        "urls": [
+            "../assets/disha_1.jpg",
+            "../assets/disha_2.jpg",
+            "../assets/disha_3.jpg",
+            "../assets/disha_4.jpg"
+        ]
+    },
+    {
+        "groupName": "Placement Insights",
+        "urls": [
+            "../assets/research_trajectory_1.jpg",
+            "../assets/research_trajectory_2.jpg",
+            "../assets/research_trajectory_3.jpg",
+            "../assets/research_trajectory_4.jpg"
+        ]
+    },
+    {
+        "groupName": "Startups 101: Exposure & Opportunities",
+        "urls": [
+            "../assets/research_trajectory_1.jpg",
+            "../assets/research_trajectory_2.jpg",
+            "../assets/research_trajectory_3.jpg",
+            "../assets/research_trajectory_4.jpg"
+        ]
+    }
+]
