@@ -28,8 +28,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 import StudentReferral from './pages/StudentReferral';
 import AlumniReferralInbox from './pages/AlumniReferralInbox';
 import ReferralChat from './pages/ReferralChat';
+import Blogs from './pages/Blogs';
+import BlogDetail from './pages/BlogDetail';
+import BlogCreate from './pages/BlogCreate';
+import BlogEdit from './pages/BlogEdit';
+import BlogAuthorRoute from './components/BlogAuthorRoute';
 
 import AdminPanelHome from './pages/AdminPanelHome';
+import AdminStudentsPage from './pages/AdminStudents';
+import AdminBlogsPage from './pages/AdminBlogs';
+import AdminBlogForm from './pages/AdminBlogForm';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -89,6 +97,12 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/:newsId" element={<News />} />
+          <Route path="/blogs" element={<Blogs />} />
+          <Route element={<BlogAuthorRoute />}>
+            <Route path="/blogs/create" element={<BlogCreate />} />
+            <Route path="/blogs/edit/:id" element={<BlogEdit />} />
+          </Route>
+          <Route path="/blogs/:id" element={<BlogDetail />} />
           <Route path="/alumni/job-postings/:id" element={<JobDetails />} />
           <Route path="/events/:title" element={<EventDetails />} />
           <Route path="/sitemap" element={<Sitemap />} />
@@ -109,6 +123,10 @@ function App() {
 
           <Route path="*" element={<NotFound />} />
           <Route path="/admin" element={<AdminPanelHome />} />
+          <Route path="/admin/students" element={<AdminStudentsPage />} />
+          <Route path="/admin/blogs" element={<AdminBlogsPage />} />
+          <Route path="/admin/blogs/create" element={<AdminBlogForm mode="create" />} />
+          <Route path="/admin/blogs/edit/:id" element={<AdminBlogForm mode="edit" />} />
         </Routes>
       </div>
     </Router>

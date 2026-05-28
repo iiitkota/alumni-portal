@@ -1,13 +1,16 @@
 const ReferralRequest = require('../models/ReferralRequest');
 const Alumni = require('../models/User');
-const pickAlumni = require('../utils/pickAlumni');
 const cloudinary = require('../config/cloudinary');
 const ReferralMessage = require('../models/ReferralMessage');
+const { assignReferralRequest } = require('../services/assignmentService');
 
 exports.sendReferralRequest = async (req, res) => {
-  const { company, role, message, jobLink } = req.body;
+  const { company, message, jobLink, jobId } = req.body;
 
   try {
+    if (!company?.trim()) {
+      return res.status(400).json({ message: 'Target company is required.' });
+    }
     if (!req.file) {
       return res.status(400).json({ message: 'Resume file is required.' });
     }
@@ -37,8 +40,16 @@ exports.sendReferralRequest = async (req, res) => {
       return res.status(500).json({ message: 'Failed to upload resume. Please try again.' });
     }
 
-    // Call pickAlumni to assign an alumni
-    const alumni = await pickAlumni(company, role, req.user._id);
+    // Assign through service (keeps queue logic and handles notifications)
+    const { alumni } = await assignReferralRequest({
+      studentId: req.user._id,
+      company: company.trim(),
+      message: message?.trim() || '',
+      resumeUrl: uploadResult.secure_url,
+      resumePublicId: uploadResult.public_id,
+      jobLink: jobLink?.trim() || undefined,
+      jobId: jobId?.trim() || undefined
+    });
 
     if (!alumni) {
       // Clean up the uploaded resume since no alumni is available
@@ -49,28 +60,9 @@ exports.sendReferralRequest = async (req, res) => {
       }
 
       return res.status(404).json({
-        message: 'No alumni available for this company and role right now. Try again later.'
+        message: 'No alumni available for this company right now. Try again later.'
       });
     }
-
-    // Create the ReferralRequest document
-    const referralRequest = new ReferralRequest({
-      student: req.user._id,
-      alumni: alumni._id,
-      company,
-      role,
-      message,
-      resumeUrl: uploadResult.secure_url,
-      resumePublicId: uploadResult.public_id,
-      jobLink
-    });
-
-    await referralRequest.save();
-
-    // Increment alumni's referralsReceivedThisWeek
-    await Alumni.findByIdAndUpdate(alumni._id, {
-      $inc: { referralsReceivedThisWeek: 1 }
-    });
 
     return res.status(201).json({ message: 'Request sent successfully' });
   } catch (error) {

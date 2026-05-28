@@ -15,13 +15,9 @@ const ReferralRequestSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  role: {
-    type: String,
-    required: true
-  },
   message: {
     type: String,
-    required: true
+    default: ''
   },
   resumeUrl: {
     type: String,
@@ -32,6 +28,9 @@ const ReferralRequestSchema = new mongoose.Schema({
     required: true
   },
   jobLink: {
+    type: String
+  },
+  jobId: {
     type: String
   },
   status: {

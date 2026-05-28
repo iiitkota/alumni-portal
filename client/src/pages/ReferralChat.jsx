@@ -4,6 +4,7 @@ import Navbar from '../components/navbar.jsx';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 const ReferralChat = () => {
   const { token, user } = useAuth();
@@ -48,15 +49,22 @@ const ReferralChat = () => {
     }
   }, [id, token]);
 
-  // Periodic polling every 10 seconds
+  // Socket.io integration
   useEffect(() => {
     if (!token || !id) return;
 
-    const interval = setInterval(() => {
-      fetchChatData(false);
-    }, 10000);
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:7034');
 
-    return () => clearInterval(interval);
+    socket.emit('join_room', id);
+
+    socket.on('new_message', (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    return () => {
+      socket.emit('leave_room', id);
+      socket.disconnect();
+    };
   }, [id, token]);
 
   // Auto-scroll to bottom whenever messages list updates
@@ -162,8 +170,19 @@ const ReferralChat = () => {
                     {user?.role === 'student' ? request.alumni?.name : request.student?.name}
                   </h3>
                   <p className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-wider">
-                    {request.role} at {request.company}
+                    {request.company}
+                    {request.jobId && ` · ${request.jobId}`}
                   </p>
+                  {request.jobLink && (
+                    <a
+                      href={request.jobLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-blue-600 hover:underline"
+                    >
+                      Job posting
+                    </a>
+                  )}
                 </div>
               </div>
               <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadgeClass(request.status)}`}>

@@ -19,6 +19,7 @@ const verificationRoutes = require("./routes/verificationRoutes"); // Add this l
 const adminPanel = require("./routes/adminPanel")
 const studentAuthRoutes = require('./routes/studentAuthRoutes');
 const referralRoutes = require('./routes/referralRoutes');
+const blogRoutes = require('./routes/blogRoutes');
 
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -34,6 +35,8 @@ const corsOptions = {
 	origin: [
 		'https://alumniportal-tau.vercel.app',
 		'http://localhost:5173',
+		'http://localhost:5174',
+		'http://localhost:5175',
 		'https://alumni.iiitkota.ac.in',
 		'https://www.alumni.iiitkota.ac.in',
 		'http://alumni.iiitkota.ac.in',
@@ -97,6 +100,7 @@ app.use("/api/register", require("./routes/register"));
 app.use("/api/admin", adminPanel)
 app.use('/api/student', studentAuthRoutes);
 app.use('/api/referral', referralRoutes);
+app.use('/api/blogs', blogRoutes);
 
 httpServer.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);

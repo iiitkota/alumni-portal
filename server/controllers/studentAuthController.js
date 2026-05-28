@@ -25,8 +25,8 @@ exports.registerStudent = async (req, res) => {
   } = req.body;
 
   try {
-    if (!personalEmail || !personalEmail.endsWith('@iiitkota.ac.in')) {
-      return res.status(400).json({ message: 'Only institute emails (@iiitkota.ac.in) are allowed' });
+    if (!personalEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalEmail)) {
+      return res.status(400).json({ message: 'Invalid Email id' });
     }
 
     const existingStudent = await Student.findOne({
@@ -68,7 +68,7 @@ exports.registerStudent = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    return res.status(200).json({ message: 'OTP sent to your institute email' });
+    return res.status(200).json({ message: 'OTP sent to your email' });
   } catch (error) {
     console.error('Error registering student:', error);
     return res.status(500).json({ message: 'Server error' });

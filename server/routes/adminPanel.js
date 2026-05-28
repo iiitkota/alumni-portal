@@ -20,6 +20,13 @@ const renameFilesWithPostId = require("../utils/renameFilesWithPostId");
 
 
 const verifyAdmin = require("../middlewares/verifyAdmin");
+const Student = require('../models/Student');
+const {
+  getAlumniReferralLookupStages,
+  getStudentReferralLookupStages,
+  getAlumniSortStage,
+  getStudentSortStage
+} = require('../utils/referralAdminStats');
 
 const ADMIN_KEY_HASH = process.env.ADMIN_KEY_HASH;
 const ADMINSECRET = process.env.ADMINSECRET  ;
@@ -375,13 +382,21 @@ router.delete('/news/:id', verifyAdmin, async (req, res) => {
 //  Fetch Alumni
 router.get('/alumni', async (req, res) => {
   try {
+    const {
+      page = 1,
+      limit = 10,
+      name,
+      instituteId,
+      graduationYear,
+      company,
+      role,
+      branch,
+      city,
+      sortBy
+    } = req.query;
 
-    // Extract query parameters
-    const { page = 1, limit=10, name, instituteId, graduationYear, company, role, branch, city } = req.query;
-
-    // Build the filter object
     const filter = {};
-    if (name) filter.name = { $regex: name, $options: 'i' }; // Case-insensitive name search
+    if (name) filter.name = { $regex: name, $options: 'i' };
     if (instituteId) filter.instituteId = { $regex: instituteId, $options: 'i' };
     if (graduationYear) filter.graduationYear = graduationYear;
     if (company) filter.currentCompany = { $regex: company, $options: 'i' };
@@ -389,37 +404,123 @@ router.get('/alumni', async (req, res) => {
     if (branch) filter.branch = { $regex: branch, $options: 'i' };
     if (city) filter.city = { $regex: city, $options: 'i' };
 
-    // Calculate skip value for pagination
-    const skip = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
+    const limitNum = Number(limit);
 
-    // Fetch paginated and filtered data
-    const alumni = await Alumni.find(filter)
-      .select('name profilePicture linkedin instituteId branch graduationYear role currentCompany city state country personalEmail phoneNumber pastCompanies achievements ')
-      .skip(skip)
-      .limit(Number(limit));
+    const pipeline = [
+      { $match: filter },
+      ...getAlumniReferralLookupStages(),
+      { $sort: getAlumniSortStage(sortBy) },
+      { $skip: skip },
+      { $limit: limitNum },
+      {
+        $project: {
+          name: 1,
+          profilePicture: 1,
+          linkedin: 1,
+          instituteId: 1,
+          branch: 1,
+          graduationYear: 1,
+          role: 1,
+          currentCompany: 1,
+          city: 1,
+          state: 1,
+          country: 1,
+          personalEmail: 1,
+          phoneNumber: 1,
+          pastCompanies: 1,
+          achievements: 1,
+          totalRequestsReceived: 1,
+          referralStats: 1
+        }
+      }
+    ];
 
-    // Get total count of matching records
-    const totalCount = await Alumni.countDocuments(filter);
+    const [alumni, totalCount, graduationYears] = await Promise.all([
+      Alumni.aggregate(pipeline),
+      Alumni.countDocuments(filter),
+      Alumni.distinct('graduationYear', filter)
+    ]);
 
-    // Calculate total pages
-    const totalPages = Math.ceil(totalCount / limit);
+    const totalPages = Math.ceil(totalCount / limitNum) || 1;
 
-    // Get unique graduation years for the filtered results
-    const graduationYears = await Alumni.distinct('graduationYear', filter);
-
-    // Send response with pagination and filtering metadata
     res.json({
       alumni,
       totalCount,
       totalPages,
       currentPage: Number(page),
-      graduationYears,
+      graduationYears
     });
   } catch (error) {
     console.error('Error fetching alumni:', error);
     res.status(500).json({ error: 'Failed to fetch alumni data' });
   }
+});
 
+// Fetch Students (admin)
+router.get('/students', async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      name,
+      instituteId,
+      graduationYear,
+      branch,
+      sortBy
+    } = req.query;
+
+    const filter = {};
+    if (name) filter.name = { $regex: name, $options: 'i' };
+    if (instituteId) filter.instituteId = { $regex: instituteId, $options: 'i' };
+    if (graduationYear) filter.graduationYear = graduationYear;
+    if (branch) filter.branch = { $regex: branch, $options: 'i' };
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const limitNum = Number(limit);
+
+    const pipeline = [
+      { $match: filter },
+      ...getStudentReferralLookupStages(),
+      { $sort: getStudentSortStage(sortBy) },
+      { $skip: skip },
+      { $limit: limitNum },
+      {
+        $project: {
+          name: 1,
+          instituteId: 1,
+          personalEmail: 1,
+          branch: 1,
+          graduationYear: 1,
+          linkedin: 1,
+          phoneNumber: 1,
+          currentYear: 1,
+          isVerified: 1,
+          totalReferralRequestsSent: 1,
+          referralStats: 1
+        }
+      }
+    ];
+
+    const [students, totalCount, graduationYears] = await Promise.all([
+      Student.aggregate(pipeline),
+      Student.countDocuments(filter),
+      Student.distinct('graduationYear', filter)
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limitNum) || 1;
+
+    res.json({
+      students,
+      totalCount,
+      totalPages,
+      currentPage: Number(page),
+      graduationYears
+    });
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    res.status(500).json({ error: 'Failed to fetch student data' });
+  }
 });
 
 
@@ -467,6 +568,27 @@ router.delete('/alumni/:id', verifyAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to delete alumnus' });
   }
 });
+
+const multer = require('multer');
+const adminBlogController = require('../controllers/adminBlogController');
+
+const blogCoverUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image files are allowed for cover images'), false);
+  }
+});
+
+router.get('/blogs/authors', verifyAdmin, adminBlogController.searchAuthors);
+router.get('/blogs/tags', verifyAdmin, adminBlogController.getBlogTags);
+router.get('/blogs', verifyAdmin, adminBlogController.listBlogs);
+router.get('/blogs/:id', verifyAdmin, adminBlogController.getBlogById);
+router.post('/blogs', verifyAdmin, blogCoverUpload.single('coverImage'), adminBlogController.createBlog);
+router.put('/blogs/:id', verifyAdmin, blogCoverUpload.single('coverImage'), adminBlogController.updateBlog);
+router.delete('/blogs/:id', verifyAdmin, adminBlogController.deleteBlog);
 
 module.exports = router
 

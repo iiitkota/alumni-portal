@@ -17,12 +17,12 @@ const StudentReferral = () => {
 
   // New request inputs
   const [company, setCompany] = useState('');
-  const [role, setRole] = useState('');
   const [showModal, setShowModal] = useState(false);
 
   // Modal form inputs
   const [message, setMessage] = useState('');
   const [jobLink, setJobLink] = useState('');
+  const [jobId, setJobId] = useState('');
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeFileName, setResumeFileName] = useState('No file chosen');
   const [submitting, setSubmitting] = useState(false);
@@ -62,8 +62,8 @@ const StudentReferral = () => {
 
   const handleOpenModal = (e) => {
     e.preventDefault();
-    if (!company.trim() || !role.trim()) {
-      toast.error('Please enter both Company and Role.');
+    if (!company.trim()) {
+      toast.error('Please enter a target company.');
       return;
     }
     setShowModal(true);
@@ -98,9 +98,9 @@ const StudentReferral = () => {
     setSubmitting(true);
     const formData = new FormData();
     formData.append('company', company);
-    formData.append('role', role);
     formData.append('message', message);
-    formData.append('jobLink', jobLink);
+    if (jobLink.trim()) formData.append('jobLink', jobLink.trim());
+    if (jobId.trim()) formData.append('jobId', jobId.trim());
     formData.append('resume', resumeFile);
 
     try {
@@ -115,16 +115,16 @@ const StudentReferral = () => {
       toast.success(response.data.message || 'Referral request sent successfully!');
       setShowModal(false);
       setCompany('');
-      setRole('');
       setMessage('');
       setJobLink('');
+      setJobId('');
       setResumeFile(null);
       setResumeFileName('No file chosen');
       fetchRequests();
     } catch (error) {
       console.error('Error submitting referral request:', error);
       if (error.response?.status === 404) {
-        toast.error('No alumni available for this company and role right now. Try again later.');
+        toast.error('No alumni available for this company right now. Try again later.');
       } else {
         toast.error(error.response?.data?.message || 'Failed to submit referral request.');
       }
@@ -194,7 +194,7 @@ const StudentReferral = () => {
 
             <form onSubmit={handleOpenModal} className="flex flex-col md:flex-row gap-4 items-end mt-4">
               <div className="flex-1 w-full">
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Company*</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Target company*</label>
                 <input
                   type="text"
                   value={company}
@@ -204,18 +204,6 @@ const StudentReferral = () => {
                   className="w-full h-12 px-4 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1c2b4a]"
                 />
               </div>
-              <div className="flex-1 w-full">
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Role*</label>
-                <input
-                  type="text"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  placeholder="e.g. Software Engineer"
-                  required
-                  className="w-full h-12 px-4 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1c2b4a]"
-                />
-              </div>
-              {/* Change: hover effect on Request referral button */}
               <button
                 type="submit"
                 className="w-full md:w-auto h-12 px-6 bg-[#1c2b4a] text-white font-medium rounded-lg
@@ -245,21 +233,41 @@ const StudentReferral = () => {
 
               <h3 className="text-xl font-bold text-[#1c2b4a] mb-1">Complete your request</h3>
               <p className="text-gray-500 text-sm mb-6">
-                Matching for: <strong className="text-gray-700">{role}</strong> at <strong className="text-gray-700">{company}</strong>
+                Matching alumni at: <strong className="text-gray-700">{company}</strong>
               </p>
 
               <form onSubmit={handleSubmitRequest} className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Message to alumni*</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Job posting link (optional)</label>
+                  <input
+                    type="url"
+                    value={jobLink}
+                    onChange={(e) => setJobLink(e.target.value)}
+                    placeholder="https://careers.company.com/jobs/..."
+                    className="w-full h-11 px-4 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1c2b4a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Job ID (optional)</label>
+                  <input
+                    type="text"
+                    value={jobId}
+                    onChange={(e) => setJobId(e.target.value)}
+                    placeholder="e.g. JR-12345"
+                    className="w-full h-11 px-4 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1c2b4a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Message to alumni (optional)</label>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Provide context, links to your projects, or why you'd be a good fit "
-                    required
+                    placeholder="Provide context, links to your projects, or why you'd be a good fit"
                     rows="4"
                     className="w-full p-4 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1c2b4a] resize-none"
                   />
-
                 </div>
 
                 <div>
@@ -355,17 +363,6 @@ const StudentReferral = () => {
                       </div>
                     )}
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Job posting link (optional)</label>
-                  <input
-                    type="url"
-                    value={jobLink}
-                    onChange={(e) => setJobLink(e.target.value)}
-                    placeholder="https://careers.company.com/jobs/..."
-                    className="w-full h-11 px-4 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1c2b4a]"
-                  />
                 </div>
 
                 {/* Change 14: hover effect on Send button */}
@@ -483,11 +480,22 @@ const StudentReferral = () => {
                     </div>
                   </div>
 
-                  {/* Company / Role row — fills the white space */}
                   <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                      <h5 className="font-bold text-gray-800 text-sm">{req.role}</h5>
-                      <p className="text-xs text-gray-500 font-semibold">{req.company}</p>
+                      <h5 className="font-bold text-gray-800 text-sm">{req.company}</h5>
+                      {req.jobLink && (
+                        <a
+                          href={req.jobLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:underline break-all block"
+                        >
+                          View job posting
+                        </a>
+                      )}
+                      {req.jobId && (
+                        <p className="text-xs text-gray-500 mt-1">Job ID: {req.jobId}</p>
+                      )}
                     </div>
 
                     {/* Action buttons live inside the info row so nothing floats */}

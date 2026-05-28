@@ -8,6 +8,7 @@ import HelpIcon from "@mui/icons-material/Help";
 import FolderSharedIcon from "@mui/icons-material/FolderShared";
 import EventIcon from "@mui/icons-material/Event";
 import FeedIcon from "@mui/icons-material/Feed";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import WorkIcon from "@mui/icons-material/Work";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -64,6 +65,7 @@ const Navbar = () => {
     if (path === "/referral-inbox") return "referral-inbox";
     if (path === "/events") return "events";
     if (path === "/news") return "news";
+    if (path.startsWith("/blogs")) return "blogs";
     return null;
   }, []);
 
@@ -255,6 +257,7 @@ const Navbar = () => {
                   <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/alumni/gallery")}>Alumni Gallery</button></li>
                   <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/alumni/job-postings")}>Jobs via Alumni</button></li>
                   <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/alumni/contact")}>Contact Us</button></li>
+                  <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/blogs")}>Alumni Blogs</button></li>
                 </ul>
               </div>
             </NavItem>
@@ -300,6 +303,12 @@ const Navbar = () => {
             <NavItem navKey="news">
               <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => navigate("/news")}>
                 NEWS
+              </button>
+            </NavItem>
+
+            <NavItem navKey="blogs">
+              <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => navigate("/blogs")}>
+                BLOGS
               </button>
             </NavItem>
 
@@ -367,12 +376,13 @@ const Navbar = () => {
                     <span className="ml-auto">{activeSubMenu === "alumni" ? "-" : "+"}</span>
                   </div>
                 </button>
-                <div className={`pl-6 overflow-hidden transition-max-height duration-300 ease-in-out ${activeSubMenu === "alumni" ? "max-h-48" : "max-h-0"}`}>
+                <div className={`pl-6 overflow-hidden transition-max-height duration-300 ease-in-out ${activeSubMenu === "alumni" ? "max-h-56" : "max-h-0"}`}>
                   <ul className="space-y-2 mt-2 text-sm font-normal border-l border-gray-200">
                     <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/prominent-alumni"); toggleMobileMenu(); }}>Prominent Alumni</li>
                     <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/gallery"); toggleMobileMenu(); }}>Alumni Gallery</li>
                     <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/job-postings"); toggleMobileMenu(); }}>Jobs via Alumni</li>
                     <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/contact"); toggleMobileMenu(); }}>Contact Us</li>
+                    <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/blogs"); toggleMobileMenu(); }}>Alumni Blogs</li>
                   </ul>
                 </div>
               </li>
@@ -422,6 +432,13 @@ const Navbar = () => {
                 <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/news"); toggleMobileMenu(); }}>
                   <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname === "/news" ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
                     <FeedIcon />News
+                  </div>
+                </button>
+              </li>
+              <li>
+                <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/blogs"); toggleMobileMenu(); }}>
+                  <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname.startsWith("/blogs") ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                    <MenuBookIcon />Alumni Blogs
                   </div>
                 </button>
               </li>

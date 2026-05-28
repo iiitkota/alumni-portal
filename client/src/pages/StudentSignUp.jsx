@@ -52,8 +52,8 @@ const StudentSignUp = () => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!formData.personalEmail.endsWith("@iiitkota.ac.in")) {
-      const errMsg = "Only institute emails (@iiitkota.ac.in) are allowed.";
+    if (!formData.personalEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.personalEmail)) {
+      const errMsg = "Please enter a valid email address.";
       setErrorMsg(errMsg);
       toast.error(errMsg);
       return;
@@ -394,7 +394,7 @@ const StudentSignUp = () => {
                   Email Verification
                 </h2>
                 <p className="text-gray-600 mb-6 text-center md:text-start">
-                  An OTP has been sent to your institute email: <strong className="text-[#19194D]">{formData.personalEmail}</strong>
+                  An OTP has been sent to your email: <strong className="text-[#19194D]">{formData.personalEmail}</strong>
                 </p>
 
                 {/* OTP Input */}

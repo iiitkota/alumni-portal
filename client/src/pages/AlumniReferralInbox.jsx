@@ -313,27 +313,33 @@ const AlumniReferralInbox = () => {
                   {/* Request details */}
                   <div className="bg-gray-50 border border-gray-150 rounded-xl p-4 flex flex-col gap-2">
                     <div className="text-sm">
-                      Requesting referral for: <strong className="text-gray-800">{req.role}</strong> at <strong className="text-gray-800">{req.company}</strong>
+                      Target company: <strong className="text-gray-800">{req.company}</strong>
                     </div>
                     {req.jobLink && (
                       <div className="text-xs text-gray-500">
-                        Job Link: <a href={req.jobLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{req.jobLink}</a>
+                        Job link: <a href={req.jobLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">{req.jobLink}</a>
+                      </div>
+                    )}
+                    {req.jobId && (
+                      <div className="text-xs text-gray-500">
+                        Job ID: <span className="text-gray-700 font-medium">{req.jobId}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Student message */}
-                  <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                    {displayText}
-                    {needsTruncation && (
-                      <button
-                        onClick={() => toggleMessageExpand(req._id)}
-                        className="text-blue-600 hover:text-[#1c2b4a] font-semibold text-xs ml-1 focus:outline-none"
-                      >
-                        {isExpanded ? 'Read less' : 'Read more'}
-                      </button>
-                    )}
-                  </div>
+                  {text.trim() && (
+                    <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                      {displayText}
+                      {needsTruncation && (
+                        <button
+                          onClick={() => toggleMessageExpand(req._id)}
+                          className="text-blue-600 hover:text-[#1c2b4a] font-semibold text-xs ml-1 focus:outline-none"
+                        >
+                          {isExpanded ? 'Read less' : 'Read more'}
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {/* Action buttons */}
                   <div className="flex flex-wrap items-center justify-between gap-4 border-t border-gray-100 pt-4 mt-2">

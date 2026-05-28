@@ -143,6 +143,7 @@ export function AlumniList() {
     let [loading, setLoading] = useState(1);
 
     let [appliedFilters, setAppliedFilters] = useState({});
+    const [sortBy, setSortBy] = useState("");
 
     const fetchAlumni = async () => {
         try {
@@ -153,7 +154,7 @@ export function AlumniList() {
                         page: currentPage,
                         limit: itemsPerPage,
                         ...appliedFilters,
-
+                        ...(sortBy ? { sortBy } : {}),
                     }
                 }
             );
@@ -176,7 +177,7 @@ export function AlumniList() {
     useEffect(() => {
 
         fetchAlumni();
-    }, [currentPage, itemsPerPage, appliedFilters])
+    }, [currentPage, itemsPerPage, appliedFilters, sortBy])
 
 
     const handleFilterChange = (field, value) => {
@@ -303,12 +304,27 @@ export function AlumniList() {
                             city: "",
                         });
                         setAppliedFilters({});
+                        setSortBy("");
                         setCurrentPage(1);
                     }}
                     className="px-3 py-1  text-black rounded-full bg-gray-200  hover:opacity-80 "
                 >
                     Reset
                 </button>
+
+                <select
+                    value={sortBy}
+                    onChange={(e) => {
+                        setSortBy(e.target.value);
+                        setCurrentPage(1);
+                    }}
+                    className="border p-1 rounded"
+                >
+                    <option value="">Sort: Default</option>
+                    <option value="mostReferrals">Most Referrals</option>
+                    <option value="mostAccepted">Most Accepted</option>
+                    <option value="mostRejected">Most Rejected</option>
+                </select>
             </div>
 
 
@@ -368,6 +384,9 @@ export function AlumniList() {
                     <p className="min-w-[60px] max-w-[60px]">Grad. Yr</p>
                     <p className="min-w-[120px] max-w-[120px]" >Role</p>
                     <p className="min-w-[120px] max-w-[120px]" >Current Company</p>
+                    <p className="min-w-[70px] max-w-[70px]" >Total Ref.</p>
+                    <p className="min-w-[70px] max-w-[70px]" >Accepted</p>
+                    <p className="min-w-[70px] max-w-[70px]" >Rejected</p>
                     <p className="min-w-[90px] max-w-[90px]" >City</p>
                     <p className="min-w-[120px] max-w-[120px]">Email</p>
                     <p className="min-w-[90px] max-w-[90px]" >Phone. No.</p>
@@ -488,6 +507,16 @@ export function AlumniList() {
                             ) : (
                                 <p className="min-w-[120px] max-w-[120px] line-clamp-1 p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]">{alumnus.currentCompany}</p>
                             )}
+
+                            <p className="min-w-[70px] max-w-[70px] line-clamp-1 p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] text-center">
+                                {alumnus.totalRequestsReceived ?? 0}
+                            </p>
+                            <p className="min-w-[70px] max-w-[70px] line-clamp-1 p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] text-center">
+                                {alumnus.referralStats?.accepted ?? 0}
+                            </p>
+                            <p className="min-w-[70px] max-w-[70px] line-clamp-1 p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] text-center">
+                                {alumnus.referralStats?.rejected ?? 0}
+                            </p>
 
                             {editingId === alumnus._id ? (
                                 <input className="min-w-[90px] max-w-[90px] line-clamp-1 p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]"
