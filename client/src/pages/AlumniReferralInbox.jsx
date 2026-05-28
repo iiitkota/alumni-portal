@@ -337,12 +337,18 @@ const AlumniReferralInbox = () => {
 
                   {/* Action buttons */}
                   <div className="flex flex-wrap items-center justify-between gap-4 border-t border-gray-100 pt-4 mt-2">
-                    <button
-                      onClick={() => window.open(req.resumeUrl, '_blank')}
-                      className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-lg transition-colors"
-                    >
-                      View resume
-                    </button>
+                  <button
+  onClick={() => {
+    if (!req.resumeUrl) {
+      toast.error('Resume not available.');
+      return;
+    }
+    window.open(req.resumeUrl, '_blank', 'noopener,noreferrer');
+  }}
+  className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-lg transition-colors"
+>
+  View resume
+</button>
 
                     <div className="flex gap-2">
                       {req.status === 'pending' && (
