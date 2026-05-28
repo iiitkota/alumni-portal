@@ -12,65 +12,39 @@ exports.sendReferralRequest = async (req, res) => {
       return res.status(400).json({ message: 'Resume file is required.' });
     }
 
+    // Upload resume to Cloudinary
+    // Works with both memoryStorage (buffer) and diskStorage (path)
     let uploadResult;
-    if (process.env.CLOUDINARY_API_KEY) {
-      // Convert buffer to data URI for Cloudinary upload
-      const fileContent = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-
-      // Upload resume to Cloudinary
-      uploadResult = await cloudinary.uploader.upload(fileContent, {
-        folder: 'iiitk-referral-resumes',
-        resource_type: 'raw'
-      });
-    } else {
-      const fs = require('fs');
-      const path = require('path');
-      const filename = `resume_${req.user._id}_${Date.now()}.pdf`;
-      const uploadDir = path.join(__dirname, '../uploads/resumes');
-      
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+    try {
+      let uploadSource;
+      if (req.file.buffer) {
+        uploadSource = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      } else if (req.file.path) {
+        uploadSource = req.file.path;
+      } else {
+        return res.status(400).json({ message: 'Resume file could not be processed.' });
       }
-      
-      const filePath = path.join(uploadDir, filename);
-      fs.writeFileSync(filePath, req.file.buffer);
-      
-      // Determine host url. Note: req.headers.host is standard in Express.
-      const protocol = req.protocol || 'http';
-      const host = req.get('host') || 'localhost:7034';
-      const apiHost = `${protocol}://${host}`;
-      
-      uploadResult = {
-        secure_url: `${apiHost}/uploads/resumes/${filename}`,
-        public_id: `local_${filename}`
-      };
+
+      uploadResult = await cloudinary.uploader.upload(uploadSource, {
+        folder: 'iiitk-referral-resumes',
+        resource_type: 'raw',
+        use_filename: true,
+        unique_filename: true,
+      });
+    } catch (uploadError) {
+      console.error('Cloudinary upload error:', uploadError);
+      return res.status(500).json({ message: 'Failed to upload resume. Please try again.' });
     }
 
     // Call pickAlumni to assign an alumni
     const alumni = await pickAlumni(company, role, req.user._id);
 
     if (!alumni) {
-      // Clean up the uploaded resume if no alumni is available
-      if (uploadResult.public_id) {
-        if (uploadResult.public_id.startsWith('local_')) {
-          const fs = require('fs');
-          const path = require('path');
-          const filename = uploadResult.public_id.replace('local_', '');
-          const filePath = path.join(__dirname, '../uploads/resumes', filename);
-          try {
-            if (fs.existsSync(filePath)) {
-              fs.unlinkSync(filePath);
-            }
-          } catch (err) {
-            console.error('Error deleting local resume file:', err);
-          }
-        } else {
-          try {
-            await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: 'raw' });
-          } catch (err) {
-            console.error('Error deleting unused resume from Cloudinary:', err);
-          }
-        }
+      // Clean up the uploaded resume since no alumni is available
+      try {
+        await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: 'raw' });
+      } catch (err) {
+        console.error('Error deleting unused resume from Cloudinary:', err);
       }
 
       return res.status(404).json({
@@ -99,7 +73,6 @@ exports.sendReferralRequest = async (req, res) => {
 
     return res.status(201).json({ message: 'Request sent successfully' });
   } catch (error) {
-    // Handle duplicate key error (code 11000)
     if (error.code === 11000) {
       return res.status(400).json({
         message: 'You already have a pending request for this company.'
@@ -142,35 +115,20 @@ exports.withdrawRequest = async (req, res) => {
       return res.status(400).json({ message: 'Only pending requests can be withdrawn' });
     }
 
-    // Update status to withdrawn
     request.status = 'withdrawn';
     request.withdrawnAt = new Date();
     await request.save();
 
-    // Delete the resume from Cloudinary or local disk
+    // Delete the resume from Cloudinary
     if (request.resumePublicId) {
-      if (request.resumePublicId.startsWith('local_')) {
-        const fs = require('fs');
-        const path = require('path');
-        const filename = request.resumePublicId.replace('local_', '');
-        const filePath = path.join(__dirname, '../uploads/resumes', filename);
-        try {
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        } catch (err) {
-          console.error('Error deleting local resume file during withdrawal:', err);
-        }
-      } else {
-        try {
-          await cloudinary.uploader.destroy(request.resumePublicId, { resource_type: 'raw' });
-        } catch (err) {
-          console.error('Error deleting resume from Cloudinary during withdrawal:', err);
-        }
+      try {
+        await cloudinary.uploader.destroy(request.resumePublicId, { resource_type: 'raw' });
+      } catch (err) {
+        console.error('Error deleting resume from Cloudinary during withdrawal:', err);
       }
     }
 
-    // Decrement alumni's referralsReceivedThisWeek by 1 (min 0)
+    // Decrement alumni's referralsReceivedThisWeek (min 0)
     const alumni = await Alumni.findById(request.alumni);
     if (alumni) {
       alumni.referralsReceivedThisWeek = Math.max(0, (alumni.referralsReceivedThisWeek || 0) - 1);
@@ -221,20 +179,15 @@ exports.respondToRequest = async (req, res) => {
       return res.status(400).json({ message: 'Already responded' });
     }
 
-    // Update the request
     request.status = status;
     request.alumniMessage = alumniMessage;
     request.respondedAt = new Date();
     await request.save();
 
-    // If accepted, track referrals given by month
     if (status === 'accepted') {
       const date = new Date();
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const monthKey = `${year}-${month}`;
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-      // Check if month already exists in the array
       const existingMonthDoc = await Alumni.findOne({
         _id: req.user._id,
         'referralsGivenByMonth.month': monthKey
@@ -289,9 +242,8 @@ exports.getMessages = async (req, res) => {
       return res.status(404).json({ message: 'Referral request not found' });
     }
 
-    // Verify req.user._id matches either request.student or request.alumni
     const studentIdStr = request.student?._id?.toString() || request.student?.toString();
-    const alumniIdStr = request.alumni?._id?.toString() || request.alumni?.toString();
+    const alumniIdStr  = request.alumni?._id?.toString()  || request.alumni?.toString();
 
     if (studentIdStr !== req.user._id.toString() && alumniIdStr !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Access denied. You are not a participant of this request.' });
@@ -321,12 +273,10 @@ exports.sendMessage = async (req, res) => {
       return res.status(404).json({ message: 'Referral request not found' });
     }
 
-    // Verify user is a participant
     if (request.student.toString() !== req.user._id.toString() && request.alumni.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Access denied. You are not a participant of this request.' });
     }
 
-    // Only allow if request status is 'pending' or 'accepted'
     if (request.status !== 'pending' && request.status !== 'accepted') {
       return res.status(400).json({ message: 'Messages can only be sent on pending or accepted requests.' });
     }
@@ -341,8 +291,13 @@ exports.sendMessage = async (req, res) => {
     await message.save();
 
     // Emit new message via Socket.io
-    const { io } = require('../server');
-    io.to(request._id.toString()).emit('new_message', message);
+    try {
+      const { io } = require('../server');
+      io.to(request._id.toString()).emit('new_message', message);
+    } catch (err) {
+      // Socket.io not available — graceful fallback, message still saved
+      console.warn('Socket.io emit skipped:', err.message);
+    }
 
     return res.status(201).json(message);
   } catch (error) {

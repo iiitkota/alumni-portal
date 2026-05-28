@@ -47,8 +47,27 @@ const alumni = [
     weeklyLimitResetAt: new Date(),
     referralQueueIndex: 0,
     referralsGivenByMonth: [],
-  }
-
+  },
+  {
+    name: 'Vikram Choudhary',
+    instituteId: '2017kuec1005',
+    branch: 'CSE',
+    personalEmail: '2017kuec1005@alumni.iiitkota.ac.in',
+    phoneNumber: '9876543203',
+    city: 'Pune', state: 'Maharashtra', country: 'India',
+    graduationYear: '2021',
+    currentCompany: 'Zynthorex Technologies',
+    role: 'Software Engineer',
+    pastCompanies: 'Infosys',
+    achievements: '',
+    linkedin: 'https://linkedin.com/in/vikramchoudhary',
+    password: pwd,
+    weeklyReferralLimit: 4,
+    referralsReceivedThisWeek: 0,
+    weeklyLimitResetAt: new Date(),
+    referralQueueIndex: 0,
+    referralsGivenByMonth: [],
+  },
 ];
 
 const students = [
