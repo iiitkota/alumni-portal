@@ -10,7 +10,8 @@ const {
   respondToRequest,
   setWeeklyLimit,
   getMessages,
-  sendMessage
+  sendMessage,
+  getUnreadCount
 } = require('../controllers/referralController');
 
 // Multer memory storage configuration for raw resume file uploading
@@ -34,5 +35,8 @@ router.patch('/limit', authenticateAlumni, setWeeklyLimit);
 // Messaging Routes (Shared)
 router.get('/request/:id/messages', authenticateAny, getMessages);
 router.post('/request/:id/messages', authenticateAny, sendMessage);
+
+// Unread Count Route
+router.get('/unread-count', authenticateAny, getUnreadCount);
 
 module.exports = router;

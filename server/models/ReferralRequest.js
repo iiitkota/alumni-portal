@@ -51,6 +51,14 @@ const ReferralRequestSchema = new mongoose.Schema({
   },
   withdrawnAt: {
     type: Date
+  },
+  studentSeen: {
+    type: Boolean,
+    default: false
+  },
+  alumniSeen: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

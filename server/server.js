@@ -20,7 +20,11 @@ const adminPanel = require("./routes/adminPanel")
 const studentAuthRoutes = require('./routes/studentAuthRoutes');
 const referralRoutes = require('./routes/referralRoutes');
 
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 7034;
 const MONGODB_URI = process.env.MONGODB_URI; // MongoDB URI from .env
 
@@ -47,6 +51,12 @@ const corsOptions = {
 	credentials: true,
 	optionsSuccessStatus: 200
 };
+
+const io = new Server(httpServer, {
+  cors: { origin: corsOptions.origin, credentials: true }
+});
+
+require('./sockets/chat')(io);
 
 // Add CORS debugging middleware
 app.use((req, res, next) => {
@@ -88,7 +98,9 @@ app.use("/api/admin", adminPanel)
 app.use('/api/student', studentAuthRoutes);
 app.use('/api/referral', referralRoutes);
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
 require('./crons');
+
+module.exports = { app, io };

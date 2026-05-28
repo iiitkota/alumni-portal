@@ -116,6 +116,11 @@ exports.getMyRequests = async (req, res) => {
       .populate('alumni', 'name branch graduationYear profilePicture')
       .sort({ sentAt: -1 });
 
+    await ReferralRequest.updateMany(
+      { student: req.user._id, status: { $in: ['accepted', 'declined'] } },
+      { $set: { studentSeen: true } }
+    );
+
     return res.status(200).json(requests);
   } catch (error) {
     console.error('Error fetching student requests:', error);
@@ -184,6 +189,11 @@ exports.getAlumniInbox = async (req, res) => {
     const requests = await ReferralRequest.find({ alumni: req.user._id })
       .populate('student', 'name branch graduationYear linkedin profilePicture')
       .sort({ sentAt: -1 });
+
+    await ReferralRequest.updateMany(
+      { alumni: req.user._id, status: 'pending' },
+      { $set: { alumniSeen: true } }
+    );
 
     return res.status(200).json(requests);
   } catch (error) {
@@ -330,9 +340,36 @@ exports.sendMessage = async (req, res) => {
 
     await message.save();
 
+    // Emit new message via Socket.io
+    const { io } = require('../server');
+    io.to(request._id.toString()).emit('new_message', message);
+
     return res.status(201).json(message);
   } catch (error) {
     console.error('Error sending message:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getUnreadCount = async (req, res) => {
+  try {
+    let count = 0;
+    if (req.userRole === 'student') {
+      count = await ReferralRequest.countDocuments({
+        student: req.user._id,
+        status: { $in: ['accepted', 'declined'] },
+        studentSeen: { $ne: true }
+      });
+    } else if (req.userRole === 'alumni') {
+      count = await ReferralRequest.countDocuments({
+        alumni: req.user._id,
+        status: 'pending',
+        alumniSeen: { $ne: true }
+      });
+    }
+    return res.status(200).json({ count });
+  } catch (error) {
+    console.error('Error in getUnreadCount:', error);
     return res.status(500).json({ message: 'Server error' });
   }
 };
