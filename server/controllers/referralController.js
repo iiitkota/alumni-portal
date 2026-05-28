@@ -30,6 +30,7 @@ exports.sendReferralRequest = async (req, res) => {
         resource_type: 'auto',
         use_filename: true,
         unique_filename: true,
+        access_mode: 'public',
       });
     } catch (uploadError) {
       console.error('Cloudinary upload error:', uploadError);
