@@ -27,7 +27,7 @@ exports.sendReferralRequest = async (req, res) => {
 
       uploadResult = await cloudinary.uploader.upload(uploadSource, {
         folder: 'iiitk-referral-resumes',
-        resource_type: 'raw',
+        resource_type: 'auto',
         use_filename: true,
         unique_filename: true,
       });
@@ -42,7 +42,7 @@ exports.sendReferralRequest = async (req, res) => {
     if (!alumni) {
       // Clean up the uploaded resume since no alumni is available
       try {
-        await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: 'raw' });
+        await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: 'auto' });
       } catch (err) {
         console.error('Error deleting unused resume from Cloudinary:', err);
       }
@@ -122,7 +122,7 @@ exports.withdrawRequest = async (req, res) => {
     // Delete the resume from Cloudinary
     if (request.resumePublicId) {
       try {
-        await cloudinary.uploader.destroy(request.resumePublicId, { resource_type: 'raw' });
+        await cloudinary.uploader.destroy(request.resumePublicId, { resource_type: 'auto' });
       } catch (err) {
         console.error('Error deleting resume from Cloudinary during withdrawal:', err);
       }
