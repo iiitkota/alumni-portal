@@ -63,7 +63,7 @@ router.post("/login",  async (req,res)=>{
 
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "Strict",
+      sameSite: process.env.NODE_ENV === 'production' ? "None" : "Lax",
       secure: process.env.NODE_ENV === 'production', // IMPORTANT: set to true in production
       maxAge: TOKEN_EXPIRY_MS
     });
@@ -571,7 +571,6 @@ router.delete('/alumni/:id', verifyAdmin, async (req, res) => {
 
 const multer = require('multer');
 const adminBlogController = require('../controllers/adminBlogController');
-
 const blogCoverUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -582,6 +581,7 @@ const blogCoverUpload = multer({
   }
 });
 
+// Blog routes
 router.get('/blogs/authors', verifyAdmin, adminBlogController.searchAuthors);
 router.get('/blogs/tags', verifyAdmin, adminBlogController.getBlogTags);
 router.get('/blogs', verifyAdmin, adminBlogController.listBlogs);
@@ -590,5 +590,65 @@ router.post('/blogs', verifyAdmin, blogCoverUpload.single('coverImage'), adminBl
 router.put('/blogs/:id', verifyAdmin, blogCoverUpload.single('coverImage'), adminBlogController.updateBlog);
 router.delete('/blogs/:id', verifyAdmin, adminBlogController.deleteBlog);
 
-module.exports = router
+// Story routes
+router.post('/stories', verifyAdmin, memoryUpload.single('image'), async (req, res) => {
+  try {
+    const { order } = req.body;
+    const file = req.file;
+    if (!file) return res.status(400).json({ message: 'No image provided' });
+    const uploadResponse = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: 'carousel_stories' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      streamifier.createReadStream(file.buffer).pipe(uploadStream);
+    });
+    const newStory = new Story({ order: order || 0, imageUrl: uploadResponse.secure_url, imagePublicId: uploadResponse.public_id });
+    await newStory.save();
+    res.status(201).json({ message: 'Story created', story: newStory });
+  } catch (error) {
+    console.error('Error creating story:', error);
+    res.status(500).json({ message: 'Server error while creating story' });
+  }
+});
+
+router.get('/stories', verifyAdmin, async (req, res) => {
+  try {
+    const stories = await Story.find().sort({ order: 1 });
+    res.json(stories);
+  } catch (error) {
+    console.error('Error fetching stories:', error);
+    res.status(500).json({ message: 'Failed to fetch stories' });
+  }
+});
+
+router.put('/stories/:id', verifyAdmin, async (req, res) => {
+  try {
+    const { order } = req.body;
+    const updatedStory = await Story.findByIdAndUpdate(req.params.id, { order }, { new: true });
+    if (!updatedStory) return res.status(404).json({ error: 'Story not found' });
+    res.json({ message: 'Story updated', story: updatedStory });
+  } catch (error) {
+    console.error('Error updating story:', error);
+    res.status(500).json({ error: 'Failed to update story' });
+  }
+});
+
+router.delete('/stories/:id', verifyAdmin, async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ error: 'Story not found' });
+    if (story.imagePublicId) await cloudinary.uploader.destroy(story.imagePublicId);
+    await Story.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Story deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting story:', error);
+    res.status(500).json({ error: 'Failed to delete story' });
+  }
+});
+
+module.exports = router;
 
