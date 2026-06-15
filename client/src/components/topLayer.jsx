@@ -11,24 +11,37 @@ import Headroom from "react-headroom";
 import Avatar from "../assets/avatar.png"
 import axios from "axios";
 import { Modal, Box, Button, Typography } from "@mui/material";
+import { useAuth } from "../context/AuthContext";
 
 let APIHOST = import.meta.env.VITE_API_URL
 
 const TopLayer = () => {
+	const { user: authUser, token, logout } = useAuth();
 	const [user, setUser] = useState(null);
 	const [error, setError] = useState(null);
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [open, setOpen] = useState(false);
-
-	const token = localStorage.getItem("token");
 
 	useEffect(() => {
 		if (token) {
 			setIsLoggedIn(true);
 			const fetchUser = async () => {
 				try {
+					let role = authUser?.role;
+					if (!role && token) {
+						try {
+							const base64Url = token.split('.')[1];
+							const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+							const decoded = JSON.parse(window.atob(base64));
+							role = decoded?.role;
+						} catch (e) {}
+					}
+					const endpoint = role === 'student'
+						? `${APIHOST}/api/student/me`
+						: `${APIHOST}/api/profile/me`;
+
 					const response = await axios.get(
-						`${APIHOST}/api/profile/me`,
+						endpoint,
 						{
 							headers: { Authorization: `Bearer ${token}` },
 						}
@@ -41,11 +54,12 @@ const TopLayer = () => {
 			fetchUser();
 		} else {
 			setIsLoggedIn(false);
+			setUser(null);
 		}
-	}, [token]);
+	}, [token, authUser]);
 
 	const handleLogout = () => {
-		localStorage.removeItem("token");
+		logout();
 		setIsLoggedIn(false);
 		setUser(null);
 		window.location.reload();

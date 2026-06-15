@@ -7,8 +7,9 @@
 const express = require('express');
 const router = express.Router();
 const Alumni = require('../models/User'); // Update path as needed
+const filterAlumniFields = require('../middleware/filterAlumniFields');
 
-router.get('/', async (req, res) => {
+router.get('/', filterAlumniFields, async (req, res) => {
   try {
     // Extract query parameters
     const { page = 1, limit = 10, name, instituteId, graduationYear, company, role, branch, city } = req.query;
@@ -18,8 +19,13 @@ router.get('/', async (req, res) => {
     if (name) filter.name = { $regex: name, $options: 'i' }; // Case-insensitive name search
     if (instituteId) filter.instituteId = { $regex: instituteId, $options: 'i' };
     if (graduationYear) filter.graduationYear = graduationYear;
-    if (company) filter.currentCompany = { $regex: company, $options: 'i' };
-    if (role) filter.role = { $regex: role, $options: 'i' };
+    
+    // Ignore company and role queries if requester is a student
+    if (!req.requesterIsStudent) {
+      if (company) filter.currentCompany = { $regex: company, $options: 'i' };
+      if (role) filter.role = { $regex: role, $options: 'i' };
+    }
+    
     if (branch) filter.branch = { $regex: branch, $options: 'i' };
     if (city) filter.city = { $regex: city, $options: 'i' };
 
@@ -27,10 +33,23 @@ router.get('/', async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Fetch paginated and filtered data
-    const alumni = await Alumni.find(filter)
+    let alumni = await Alumni.find(filter)
       .select('name profilePicture linkedin instituteId branch graduationYear role currentCompany city')
       .skip(skip)
       .limit(Number(limit));
+
+    // Map over results to delete sensitive fields if requester is a student
+    if (req.requesterIsStudent) {
+      alumni = alumni.map(a => {
+        const obj = a.toObject ? a.toObject() : { ...a };
+        delete obj.currentCompany;
+        delete obj.role;
+        delete obj.linkedin;
+        delete obj.phoneNumber;
+        delete obj.personalEmail;
+        return obj;
+      });
+    }
 
     // Get total count of matching records
     const totalCount = await Alumni.countDocuments(filter);
@@ -55,11 +74,23 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/all', async (req, res) => {
+router.get('/all', filterAlumniFields, async (req, res) => {
   try {
     // Fetch all alumni data without pagination
-    const alumni = await Alumni.find({})
+    let alumni = await Alumni.find({})
       .select('branch graduationYear role currentCompany city');
+
+    if (req.requesterIsStudent) {
+      alumni = alumni.map(a => {
+        const obj = a.toObject ? a.toObject() : { ...a };
+        delete obj.currentCompany;
+        delete obj.role;
+        delete obj.linkedin;
+        delete obj.phoneNumber;
+        delete obj.personalEmail;
+        return obj;
+      });
+    }
 
     // Send the entire alumni data as a response
     res.json({ alumni });

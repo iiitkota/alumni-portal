@@ -340,7 +340,7 @@ const JobsPosting = () => {
 											width: { lg: 400, md: 300, sm: 300, xs: 325 },
 											boxShadow: 3,
 											borderRadius: 2,
-											transition: "transform 0.3s, box-shadow 0.3s",
+											transition: "transform 0.5s ease-out, box-shadow 0.3s, opacity 0.5s ease-out",
 											"&:hover": {
 												transform: "translateY(-5px)",
 												boxShadow: 6,
@@ -351,8 +351,6 @@ const JobsPosting = () => {
 											transform: visibleRows[index]
 												? "scale(1)"
 												: "scale(0.95)",
-											transition:
-												"opacity 0.5s ease-out, transform 0.5s ease-out",
 										}}
 										ref={(el) => (rowRefs.current[index] = el)}
 										data-index={index}
