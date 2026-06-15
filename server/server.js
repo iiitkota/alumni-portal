@@ -1,14 +1,15 @@
-// Polyfill for SlowBuffer which was removed in recent Node versions (legacy dependency compatibility)
 const bufferModule = require('buffer');
 if (!bufferModule.SlowBuffer) {
   bufferModule.SlowBuffer = bufferModule.Buffer;
 }
-require("dotenv").config();
+require("dotenv").config(); // Load environment variables
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require('path');
 const cookieParser = require("cookie-parser");
+
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const alumniRoutes = require("./routes/alumni");

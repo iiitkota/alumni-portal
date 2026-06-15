@@ -14,6 +14,11 @@ const Event = require("../models/Event");
 
 const fs = require('fs')
 const upload = require("../middlewares/upload");
+const multer = require('multer');
+const cloudinary = require('../config/cloudinary');
+const streamifier = require('streamifier');
+const Story = require('../models/Story');
+const memoryUpload = multer({ storage: multer.memoryStorage() });
 const { v4: uuidv4 } = require('uuid');  
 const renameFilesWithPostId = require("../utils/renameFilesWithPostId");
 
@@ -36,13 +41,7 @@ if (!ADMIN_KEY_HASH || !ADMINSECRET) {
     throw new Error("FATAL ERROR: Required environment variables are not set.");
 }
 
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // Limit each IP to 10 login requests per 15 minutes
-    message: { success: false, message: 'Too many login attempts. Please try again later.' },
-    standardHeaders: true, 
-    legacyHeaders: false, 
-});
+ 
 
 
 // api/admin/login
@@ -590,12 +589,17 @@ router.post('/blogs', verifyAdmin, blogCoverUpload.single('coverImage'), adminBl
 router.put('/blogs/:id', verifyAdmin, blogCoverUpload.single('coverImage'), adminBlogController.updateBlog);
 router.delete('/blogs/:id', verifyAdmin, adminBlogController.deleteBlog);
 
-// Story routes
+// --- POST /api/admin/stories ---
 router.post('/stories', verifyAdmin, memoryUpload.single('image'), async (req, res) => {
   try {
     const { order } = req.body;
     const file = req.file;
-    if (!file) return res.status(400).json({ message: 'No image provided' });
+
+    if (!file) {
+      return res.status(400).json({ message: 'No image provided' });
+    }
+
+    // Upload to Cloudinary
     const uploadResponse = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { folder: 'carousel_stories' },
@@ -606,7 +610,13 @@ router.post('/stories', verifyAdmin, memoryUpload.single('image'), async (req, r
       );
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
-    const newStory = new Story({ order: order || 0, imageUrl: uploadResponse.secure_url, imagePublicId: uploadResponse.public_id });
+
+    const newStory = new Story({
+      order: order || 0,
+      imageUrl: uploadResponse.secure_url,
+      imagePublicId: uploadResponse.public_id,
+    });
+
     await newStory.save();
     res.status(201).json({ message: 'Story created', story: newStory });
   } catch (error) {
@@ -615,6 +625,7 @@ router.post('/stories', verifyAdmin, memoryUpload.single('image'), async (req, r
   }
 });
 
+// --- GET /api/admin/stories ---
 router.get('/stories', verifyAdmin, async (req, res) => {
   try {
     const stories = await Story.find().sort({ order: 1 });
@@ -625,11 +636,22 @@ router.get('/stories', verifyAdmin, async (req, res) => {
   }
 });
 
+// --- PUT /api/admin/stories/:id ---
 router.put('/stories/:id', verifyAdmin, async (req, res) => {
   try {
     const { order } = req.body;
-    const updatedStory = await Story.findByIdAndUpdate(req.params.id, { order }, { new: true });
-    if (!updatedStory) return res.status(404).json({ error: 'Story not found' });
+    const storyId = req.params.id;
+
+    const updatedStory = await Story.findByIdAndUpdate(
+      storyId,
+      { order },
+      { new: true }
+    );
+
+    if (!updatedStory) {
+      return res.status(404).json({ error: 'Story not found' });
+    }
+
     res.json({ message: 'Story updated', story: updatedStory });
   } catch (error) {
     console.error('Error updating story:', error);
@@ -637,12 +659,23 @@ router.put('/stories/:id', verifyAdmin, async (req, res) => {
   }
 });
 
+// --- DELETE /api/admin/stories/:id ---
 router.delete('/stories/:id', verifyAdmin, async (req, res) => {
   try {
-    const story = await Story.findById(req.params.id);
-    if (!story) return res.status(404).json({ error: 'Story not found' });
-    if (story.imagePublicId) await cloudinary.uploader.destroy(story.imagePublicId);
-    await Story.findByIdAndDelete(req.params.id);
+    const storyId = req.params.id;
+    const story = await Story.findById(storyId);
+
+    if (!story) {
+      return res.status(404).json({ error: 'Story not found' });
+    }
+
+    // Delete image from Cloudinary
+    if (story.imagePublicId) {
+      await cloudinary.uploader.destroy(story.imagePublicId);
+    }
+
+    await Story.findByIdAndDelete(storyId);
+
     res.json({ message: 'Story deleted successfully' });
   } catch (error) {
     console.error('Error deleting story:', error);
@@ -651,4 +684,3 @@ router.delete('/stories/:id', verifyAdmin, async (req, res) => {
 });
 
 module.exports = router;
-
