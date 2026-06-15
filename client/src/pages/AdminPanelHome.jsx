@@ -31,7 +31,6 @@ export default function AdminPanelHome() {
   const navigate = useNavigate();
   const [page, setPage] = useState("Home");
   const pages = ["Home", "Students", "Blogs", "News", "Events", "Stories"];
-
   const [auth, setAuth] = useState(false);
   const [key, setKey] = useState("");
   const [loading, setLoading] = useState(true);
