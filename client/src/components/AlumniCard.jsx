@@ -29,12 +29,7 @@ const AlumniCard = ({ alumniData, onOpenImage }) => {
             <img src={getLowQualityImageUrl(alumniData.profilePicture)} alt="Profile" loading="lazy" width={96} height={96} className='w-full h-full object-cover' />
           </div>
           <div className='mt-4 flex w-full gap-1'>
-            <a href={alumniData.linkedin} target="_blank" rel="noopener noreferrer" className='w-1/2 flex justify-center'>
-              <button className='flex items-center justify-center w-full rounded-lg h-10 bg-blue-600 hover:bg-blue-500 text-white'>
-                <LinkedInIcon />
-              </button>
-            </a>
-            <a href={`/profile/${alumniData._id}`} rel="noopener noreferrer" className='w-1/2 flex justify-center' onClick={handleProfileClick}>
+            <a href={`/profile/${alumniData._id}`} rel="noopener noreferrer" className='w-full flex justify-center' onClick={handleProfileClick}>
               <button className='flex items-center justify-center w-full rounded-lg h-10 bg-teal-600 hover:bg-teal-500  text-white'>
                 <PersonIcon />
               </button>
@@ -45,8 +40,7 @@ const AlumniCard = ({ alumniData, onOpenImage }) => {
           <div className='text-xl font-semibold text-gray-800'>{alumniData.name}</div>
           <div className='text-sm text-gray-700'>{alumniData.instituteId}</div>
           <div className='text-sm text-gray-700'>{alumniData.branch}, {alumniData.graduationYear}</div>
-          <div className='text-sm text-gray-700'>{alumniData.role}</div>
-          <div className='text-sm text-gray-700'>{alumniData.currentCompany}, {alumniData.city}</div>
+          <div className='text-sm text-gray-700'>{alumniData.city}</div>
         </div>
       </div>
     </>

@@ -150,7 +150,7 @@ exports.signIn = async (req, res) => {
 
     // Generate a JWT token
     const token = jwt.sign(
-      { id: user._id, instituteId: user.instituteId },
+      { id: user._id, instituteId: user.instituteId, role: user.role || 'alumni' },
       JWT_SECRET,
       { expiresIn: '30d' } // Token expiration time
     );

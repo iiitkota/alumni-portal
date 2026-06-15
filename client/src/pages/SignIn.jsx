@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import Logo from "../assets/iiitkotalogo.png";
 import { toast, Toaster } from "react-hot-toast"; // Import from react-hot-toast
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 let APIHOST = import.meta.env.VITE_API_URL
 
 
 function SignIn() {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     instituteId: "",
     password: "",
@@ -43,8 +45,8 @@ function SignIn() {
         }
       );
 
-      // Store the JWT token in localStorage
-      localStorage.setItem('token', response.data.token);
+      // Store the JWT token in localStorage and update auth state
+      login(response.data.token);
 
       // Reset the form data
       setFormData({
@@ -89,6 +91,24 @@ function SignIn() {
         <h2 className="text-3xl font-semibold text-center text-[#32325D] mb-6">
           Sign In
         </h2>
+
+        {/* Toggle Switch to choose between Alumni and Student */}
+        <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
+          <button
+            type="button"
+            className="flex-1 py-2 text-center text-sm font-semibold rounded-lg transition-all bg-[#0E407C] text-white shadow"
+          >
+            Alumni
+          </button>
+          <button
+            type="button"
+            className="flex-1 py-2 text-center text-sm font-semibold rounded-lg transition-all text-gray-500 hover:text-gray-800"
+            onClick={() => navigate('/student-signin')}
+          >
+            Student
+          </button>
+        </div>
+
         <form className="flex flex-col" onSubmit={handleSubmit}>
           <div className="mb-4 flex items-center">
             <input

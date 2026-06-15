@@ -3,6 +3,7 @@ import axios from "axios";
 import Navbar from "../components/navbar.jsx";
 import Footer from "../components/Footer";
 import AlumniCard from "../components/AlumniCard.jsx";
+import { useAuth } from "../context/AuthContext";
 import SignInPrompt from "./SignInPrompt"; // Import the SignInPrompt component
 import AlumniVisualizations from "../components/AlumniVisualizations";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
@@ -58,6 +59,7 @@ const ImageModal = ({ isOpen, onClose, imageSrc }) => {
 };
 
 const Directory = () => {
+	const { user } = useAuth();
 	const [alumni, setAlumni] = useState([]);
 	const [filters, setFilters] = useState({
 		name: "",
@@ -90,6 +92,7 @@ const Directory = () => {
 		const fetchAlumni = async () => {
 			try {
 				setLoading(true);
+				const token = localStorage.getItem('token');
 				const response = await axios.get(
 					`${APIHOST}/api/alumni`, 
 					{
@@ -98,9 +101,13 @@ const Directory = () => {
 							limit: itemsPerPage,
 							...appliedFilters,
 						},
+						headers: token ? {
+							Authorization: `Bearer ${token}`
+						} : {},
 						signal: controller.signal,
 					}
 				);
+				// Set the alumni results from response
 				setAlumni(response.data.alumni);
 				setTotalCount(response.data.totalCount);
 				setTotalPages(response.data.totalPages);
@@ -219,22 +226,7 @@ const Directory = () => {
 									</option>
 								))}
 							</select>
-							<input
-								type="text"
-								name="company"
-								placeholder="Company"
-								value={filters.company}
-								onChange={handleFilterChange}
-								className="h-12 3xl:h-16 px-4 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#19194D]"
-							/>
-							<input
-								type="text"
-								name="role"
-								placeholder="Role"
-								value={filters.role}
-								onChange={handleFilterChange}
-								className="h-12 3xl:h-16 px-4 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#19194D]"
-							/>
+							{/* Company and Role filters removed */}
 							<input
 								type="text"
 								name="branch"
@@ -384,22 +376,7 @@ const Directory = () => {
 												</option>
 											))}
 										</select>
-										<input
-											type="text"
-											name="company"
-											placeholder="Company"
-											value={filters.company}
-											onChange={handleFilterChange}
-											className="h-12 px-4 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#19194D]"
-										/>
-										<input
-											type="text"
-											name="role"
-											placeholder="Role"
-											value={filters.role}
-											onChange={handleFilterChange}
-											className="h-12 px-4 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#19194D]"
-										/>
+										{/* Company and Role filters removed */}
 										<input
 											type="text"
 											name="branch"

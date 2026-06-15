@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+.font-blog {
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.blog-prose {
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.75;
+}
+
+.blog-prose p {
+  margin-bottom: 1rem;
+}
+
+.blog-title {
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.blog-meta {
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out;
+}
+
 /* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
     width: 0px; /* Set the width of the scrollbar */

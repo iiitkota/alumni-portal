@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "../assets/iiitkotalogo.png";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -8,17 +8,22 @@ import HelpIcon from "@mui/icons-material/Help";
 import FolderSharedIcon from "@mui/icons-material/FolderShared";
 import EventIcon from "@mui/icons-material/Event";
 import FeedIcon from "@mui/icons-material/Feed";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import WorkIcon from "@mui/icons-material/Work";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LogoutIcon from "@mui/icons-material/Logout";
+import InboxIcon from "@mui/icons-material/Inbox";
+import SendIcon from "@mui/icons-material/Send";
 import Avatar from "../assets/avatar.png";
 import TopLayer from "./topLayer.jsx";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -26,9 +31,7 @@ const Navbar = () => {
   const toggleMobileMenu = () => {
     setTimeout(() => {
       setIsMobileMenuOpen((prev) => {
-        if (prev) {
-          setActiveSubMenu(null);
-        }
+        if (prev) setActiveSubMenu(null);
         return !prev;
       });
     }, 200);
@@ -38,31 +41,140 @@ const Navbar = () => {
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
   };
 
+  const { user: authUser, token, logout } = useAuth();
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const token = localStorage.getItem("token");
+  const navLinksRef = useRef({});
+
+  // hoverStyle = ghost indicator that follows mouse
+  const [hoverStyle, setHoverStyle] = useState({ left: 0, width: 0, opacity: 0 });
+  const hoverTimeoutRef = useRef(null);
+
+  // Direct DOM ref for the active indicator — set synchronously via
+  // useLayoutEffect so it never animates from left:0 on page load
+  const activeIndicatorRef = useRef(null);
+
+  const getActiveKey = useCallback((path) => {
+    if (path === "/about") return "about";
+    if (path.startsWith("/alumni")) return "alumni";
+    if (path === "/directory") return "directory";
+    if (path === "/referrals") return "referrals";
+    if (path === "/referral-inbox") return "referral-inbox";
+    if (path === "/events") return "events";
+    if (path === "/news") return "news";
+    if (path.startsWith("/blogs")) return "blogs";
+    return null;
+  }, []);
+
+  // Runs synchronously after DOM paint — positions indicator instantly on load,
+  // then lets CSS transition handle route-change animations smoothly
+  useLayoutEffect(() => {
+    const key = getActiveKey(pathname);
+    const el = key ? navLinksRef.current[key] : null;
+    const bar = activeIndicatorRef.current;
+    if (!bar) return;
+
+    if (el) {
+      const fresh = !bar.dataset.initialized;
+      if (fresh) {
+        // First render: snap to position with no animation
+        bar.style.transition = 'none';
+        bar.style.left = el.offsetLeft + 'px';
+        bar.style.width = el.offsetWidth + 'px';
+        bar.style.opacity = '1';
+        bar.getBoundingClientRect(); // force reflow
+        bar.style.transition = '';
+        bar.dataset.initialized = '1';
+      } else {
+        // Subsequent navigations: animate from old position to new
+        bar.style.left = el.offsetLeft + 'px';
+        bar.style.width = el.offsetWidth + 'px';
+        bar.style.opacity = '1';
+      }
+    } else {
+      bar.style.opacity = '0';
+    }
+  }, [pathname, isLoggedIn, user, getActiveKey]);
+
+  const handleNavHoverEnter = (key) => {
+    clearTimeout(hoverTimeoutRef.current);
+    const el = navLinksRef.current[key];
+    if (el) {
+      setHoverStyle({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
+    }
+  };
+
+  const handleNavHoverLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoverStyle((prev) => ({ ...prev, opacity: 0 }));
+    }, 120);
+  };
+
+  useEffect(() => {
+    let role = authUser?.role;
+    if (!role && token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decoded = JSON.parse(window.atob(base64));
+        role = decoded?.role;
+      } catch (e) { }
+    }
+
+    if (!token || (role !== "student" && role !== "alumni")) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const APIHOST = import.meta.env.VITE_API_URL || "http://localhost:7034";
+        const response = await axios.get(`${APIHOST}/api/referral/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUnreadCount(response.data.count || 0);
+      } catch (err) {
+        console.error("Error fetching unread count:", err);
+      }
+    };
+
+    fetchUnreadCount();
+    const intervalId = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(intervalId);
+  }, [token, authUser]);
 
   useEffect(() => {
     if (token) {
       setIsLoggedIn(true);
       const fetchUser = async () => {
         try {
-          const response = await axios.get(
-            "https://alumni-api.iiitkota.ac.in/api/profile/me",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+          const APIHOST = import.meta.env.VITE_API_URL || "https://alumni-api.iiitkota.ac.in";
+          let role = authUser?.role;
+          if (!role && token) {
+            try {
+              const base64Url = token.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const decoded = JSON.parse(window.atob(base64));
+              role = decoded?.role;
+            } catch (e) { }
+          }
+          const endpoint = role === 'student'
+            ? `${APIHOST}/api/student/me`
+            : `${APIHOST}/api/profile/me`;
+
+          const response = await axios.get(endpoint, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           setUser(response.data);
         } catch (error) {
-          if (error.response && error.response.status === 401) { 
-            // console.log("Token expired or invalid. Logging out...");
-            localStorage.removeItem("token");
+          if (error.response && error.response.status === 401) {
+            logout();
             setIsLoggedIn(false);
             setUser(null);
-            window.location.reload();
+            navigate('/');
           } else {
             setError(error.message);
           }
@@ -71,25 +183,33 @@ const Navbar = () => {
       fetchUser();
     } else {
       setIsLoggedIn(false);
+      setUser(null);
     }
-  }, [token]);
+  }, [token, authUser, logout]);
 
   const handleLogout = (e) => {
     e.preventDefault();
-    localStorage.removeItem('token');
+    logout();
     setIsLoggedIn(false);
     setUser(null);
     toggleMobileMenu();
-    window.location.reload();
+    navigate('/');
   };
 
-  const openLogoutModal = () => {
-    setIsLogoutModalOpen(true);
-  };
+  const openLogoutModal = () => setIsLogoutModalOpen(true);
+  const closeLogoutModal = () => setIsLogoutModalOpen(false);
 
-  const closeLogoutModal = () => {
-    setIsLogoutModalOpen(false);
-  };
+  // Helper: nav item wrapper — attaches hover handlers
+  const NavItem = ({ navKey, children, className = "" }) => (
+    <div
+      ref={(el) => (navLinksRef.current[navKey] = el)}
+      className={`w-auto px-6 h-full relative group flex items-center text-[#19194D] ${className}`}
+      onMouseEnter={() => handleNavHoverEnter(navKey)}
+      onMouseLeave={handleNavHoverLeave}
+    >
+      {children}
+    </div>
+  );
 
   return (
     <div className="w-full h-auto fixed top-0 left-0 z-[20] shadow-md">
@@ -106,113 +226,122 @@ const Navbar = () => {
             </button>
           </div>
           <div className="w-auto h-full flex flex-col justify-center">
-            <h6
-              className="text-[12px] max-w-980:text-[9px] max-w-492:text-[7px] text-[#19194D] max-w-1464:hidden max-w-980:block"
-              style={{ fontWeight: "700" }}
-            >
+            <h6 className="text-[12px] max-w-980:text-[9px] max-w-492:text-[7px] text-[#19194D] max-w-1464:hidden max-w-980:block" style={{ fontWeight: "700" }}>
               Alumni Cell
             </h6>
-            <h6
-              className="text-[12px] max-w-980:text-[9px] max-w-492:text-[7px] font-bold text-[#19194D] max-w-1464:hidden max-w-980:block"
-              style={{ fontWeight: "1000" }}
-            >
+            <h6 className="text-[12px] max-w-980:text-[9px] max-w-492:text-[7px] font-bold text-[#19194D] max-w-1464:hidden max-w-980:block" style={{ fontWeight: "1000" }}>
               Indian Institute of Information Technology, Kota
             </h6>
-            <h6
-              className="text-[12px] max-w-980:text-[9px] max-w-492:text-[7px] font-bold text-[#19194D] font-sans max-w-1464:hidden max-w-980:block"
-              style={{ fontWeight: "1000" }}
-            >
+            <h6 className="text-[12px] max-w-980:text-[9px] max-w-492:text-[7px] font-bold text-[#19194D] font-sans max-w-1464:hidden max-w-980:block" style={{ fontWeight: "1000" }}>
               (An Institute of National Importance under an Act of Parliament)
             </h6>
           </div>
         </div>
-        <div
-          className={`w-2/3 max-w-1464:w-[90%] max-w-980:w-[20%] h-full flex ${window.innerWidth <= 980
-              ? "justify-center items-center"
-              : "justify-end items-center pr-4"
-            }`}
-        >
-          <div className="w-auto px-6 h-full flex relative group items-center text-[#19194D] max-w-980:hidden max-w-1464:ml-44">
-            <button
-              className="text-[0.9rem] font-sans hover:cursor-pointer"
-              style={{ fontWeight: "400" }}
-              onClick={() => navigate("/about")}
-            >
-              ABOUT US
-            </button>
-          </div>
 
-          <div className="w-auto px-6 h-full relative group flex items-center text-[#19194D] max-w-980:hidden">
-            <p
-              className="text-[0.9rem] font-sans hover:cursor-pointer"
-              style={{ fontWeight: "400" }}
-            >
-              ALUMNI ASSIST
-            </p>
-            <div className="rounded-md absolute top-12 opacity-0 invisible group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 bg-white drop-shadow-2xl py-2 mt-2 w-[12rem] transition-all duration-300 ease-in-out transform translate-y-2">
-              <ul className="w-full">
-                <li className="hover:bg-gray-100 p-2">
-                  <button onClick={() => navigate("/alumni/prominent-alumni")}>
-                    Prominent Alumni
-                  </button>
-                </li>
-                <li className="hover:bg-gray-100 p-2">
-                  <button onClick={() => navigate("/alumni/gallery")}>
-                    Alumni Gallery
-                  </button>
-                </li>
-                <li className="hover:bg-gray-100 p-2">
-                  <button onClick={() => navigate("/alumni/job-postings")}>
-                    Jobs via Alumni
-                  </button>
-                </li>
-                <li className="hover:bg-gray-100 p-2">
-                  <button onClick={() => navigate("/alumni/contact")}>
-                    Contact Us
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
+        <div className={`w-2/3 max-w-1464:w-[90%] max-w-980:w-[20%] h-full flex ${window.innerWidth <= 980 ? "justify-center items-center" : "justify-end items-center pr-4"}`}>
+          <div className="relative flex items-center h-full max-w-980:hidden">
 
-          <div className="w-auto px-6 h-full relative group flex items-center text-[#19194D] max-w-980:hidden">
-            <button
-              className="text-[0.9rem] font-sans hover:cursor-pointer"
-              style={{ fontWeight: "400" }}
-              onClick={() => navigate("/directory")}
-            >
-              DIRECTORY
-            </button>
-          </div>
+            <NavItem navKey="about" className="max-w-1464:ml-44">
+              <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => navigate("/about")}>
+                ABOUT US
+              </button>
+            </NavItem>
 
-          <div className="w-auto px-6 h-full relative group flex items-center text-[#19194D] max-w-980:hidden">
-            <button
-              className="text-[0.9rem] font-sans hover:cursor-pointer"
-              style={{ fontWeight: "400" }}
-              onClick={() => navigate("/events")}
-            >
-              EVENTS
-            </button>
-          </div>
+            <NavItem navKey="alumni">
+              <p className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }}>
+                ALUMNI ASSIST
+              </p>
+              <div className="rounded-md absolute top-12 opacity-0 invisible group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 bg-white drop-shadow-2xl py-2 mt-2 w-[12rem] transition-all duration-300 ease-in-out transform translate-y-2">
+                <ul className="w-full">
+                  <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/alumni/prominent-alumni")}>Prominent Alumni</button></li>
+                  <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/alumni/gallery")}>Alumni Gallery</button></li>
+                  <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/alumni/job-postings")}>Jobs via Alumni</button></li>
+                  <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/alumni/contact")}>Contact Us</button></li>
+                  <li className="hover:bg-gray-100 p-2"><button onClick={() => navigate("/blogs")}>Alumni Blogs</button></li>
+                </ul>
+              </div>
+            </NavItem>
 
-          <div className="w-auto px-6 h-full relative group flex items-center text-[#19194D] max-w-980:hidden">
-            <button
-              className="text-[0.9rem] font-sans hover:cursor-pointer"
-              style={{ fontWeight: "400" }}
-              onClick={() => navigate("/news")}
-            >
-              NEWS
-            </button>
-          </div>
+            <NavItem navKey="directory">
+              <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => navigate("/directory")}>
+                DIRECTORY
+              </button>
+            </NavItem>
 
-          <div className="w-auto px-6 h-full relative group flex items-center text-[#19194D] max-w-980:hidden">
-            <button
-              className="text-[0.9rem] font-sans hover:cursor-pointer"
-              style={{ fontWeight: "400" }}
-              onClick={() => window.open("https://tpcell.iiitkota.ac.in/", "_blank")}
-            >
-              PLACEMENTS
-            </button>
+            {isLoggedIn && authUser?.role === 'student' && (
+              <NavItem navKey="referrals">
+                <button className="text-[0.9rem] font-sans hover:cursor-pointer flex items-center" style={{ fontWeight: "400" }} onClick={() => navigate("/referrals")}>
+                  REFERRALS
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ml-1.5 relative top-[-1px]">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+              </NavItem>
+            )}
+
+            {isLoggedIn && authUser?.role === 'alumni' && (
+              <NavItem navKey="referral-inbox" className="text-nowrap">
+                <button className="text-[0.9rem] font-sans hover:cursor-pointer flex items-center" style={{ fontWeight: "400" }} onClick={() => navigate("/referral-inbox")}>
+                  REFERRAL INBOX
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ml-1.5 relative top-[-1px]">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+              </NavItem>
+            )}
+
+            <NavItem navKey="events">
+              <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => navigate("/events")}>
+                EVENTS
+              </button>
+            </NavItem>
+
+            <NavItem navKey="news">
+              <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => navigate("/news")}>
+                NEWS
+              </button>
+            </NavItem>
+
+            <NavItem navKey="blogs">
+              <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => navigate("/blogs")}>
+                BLOGS
+              </button>
+            </NavItem>
+
+            <NavItem navKey="placements">
+              <button className="text-[0.9rem] font-sans hover:cursor-pointer" style={{ fontWeight: "400" }} onClick={() => window.open("https://tpcell.iiitkota.ac.in/", "_blank")}>
+                PLACEMENTS
+              </button>
+            </NavItem>
+
+            {/* Hover ghost indicator — lighter, follows mouse */}
+            <div
+              className="absolute bottom-0 h-[2px] rounded-full pointer-events-none"
+              style={{
+                left: hoverStyle.left,
+                width: hoverStyle.width,
+                opacity: hoverStyle.opacity * 0.35,
+                background: '#19194D',
+                transition: 'left 200ms cubic-bezier(0.4,0,0.2,1), width 200ms cubic-bezier(0.4,0,0.2,1), opacity 150ms ease',
+              }}
+            />
+
+            {/* Active indicator — driven by direct DOM ref, no state-lag */}
+            <div
+              ref={activeIndicatorRef}
+              className="absolute bottom-0 h-[2px] rounded-full pointer-events-none"
+              style={{
+                left: 0,
+                width: 0,
+                opacity: 0,
+                background: '#19194D',
+                transition: 'left 320ms cubic-bezier(0.4,0,0.2,1), width 320ms cubic-bezier(0.4,0,0.2,1), opacity 200ms ease',
+              }}
+            />
           </div>
 
           <div className="hidden w-full h-full text-[#19194D] max-w-980:flex max-w-980:justify-center max-w-980:items-center">
@@ -221,20 +350,12 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Modal */}
-      <div
-        className={`fixed top-2 right-2 md:right-8 w-[96vw] md:w-[60vw] h-auto flex items-center justify-center transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-      >
-        <div
-          className={`bg-white border-b-8 border-[#0E407C] shadow-2xl w-full h-full p-6 transition-opacity duration-300 transform ${isMobileMenuOpen ? "opacity-100" : "opacity-95"
-            }`}
-        >
+      {/* Mobile Menu */}
+      <div className={`fixed top-2 right-2 md:right-8 w-[96vw] md:w-[60vw] h-auto flex items-center justify-center transition-opacity duration-300 ${isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <div className={`bg-white border-b-8 border-[#0E407C] shadow-2xl w-full h-full p-6 transition-opacity duration-300 transform ${isMobileMenuOpen ? "opacity-100" : "opacity-95"}`}>
           <div className="flex justify-between items-center border-b border-gray-200 text-[#172B4D] pb-4">
             <div className="w-auto h-auto flex gap-2 justify-start items-center">
-              <button onClick={() => navigate("/")}>
-                <img src={Logo} alt="home_page" className="w-10 h-10" />
-              </button>
+              <button onClick={() => navigate("/")}><img src={Logo} alt="home_page" className="w-10 h-10" /></button>
               <h3 className="text-lg font-semibold tracking-wide">MENU</h3>
             </div>
             <CloseIcon onClick={toggleMobileMenu} className="cursor-pointer" />
@@ -242,193 +363,115 @@ const Navbar = () => {
           <div className="mt-4">
             <ul className="space-y-3">
               <li>
-                <button
-                  className="w-full text-left text-[#172B4D]"
-                  onClick={() => {
-                    navigate("/about");
-                    toggleMobileMenu();
-                  }}
-                >
-                  <div className="flex gap-3 items-center text-base font-medium">
-                    <InfoIcon />
-                    About Us
+                <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/about"); toggleMobileMenu(); }}>
+                  <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname === "/about" ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                    <InfoIcon />About Us
                   </div>
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => handleSubMenuToggle("alumni")}
-                  className="w-full text-left text-[#172B4D]"
-                >
-                  <div className="flex gap-3 items-center text-base font-medium">
-                    <HelpIcon />
-                    Alumni Assist
-                    <span className="ml-auto">
-                      {activeSubMenu === "alumni" ? "-" : "+"}
-                    </span>
+                <button onClick={() => handleSubMenuToggle("alumni")} className="w-full text-left text-[#172B4D]">
+                  <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname.startsWith("/alumni") ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                    <HelpIcon />Alumni Assist
+                    <span className="ml-auto">{activeSubMenu === "alumni" ? "-" : "+"}</span>
                   </div>
                 </button>
-                <div
-                  className={`pl-6 overflow-hidden transition-max-height duration-300 ease-in-out ${activeSubMenu === "alumni" ? "max-h-48" : "max-h-0"
-                    }`}
-                >
+                <div className={`pl-6 overflow-hidden transition-max-height duration-300 ease-in-out ${activeSubMenu === "alumni" ? "max-h-56" : "max-h-0"}`}>
                   <ul className="space-y-2 mt-2 text-sm font-normal border-l border-gray-200">
-                    <li
-                      className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        navigate("/alumni/prominent-alumni");
-                        toggleMobileMenu();
-                      }}
-                    >
-                      Prominent Alumni
-                    </li>
-                    <li
-                      className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        navigate("/alumni/gallery");
-                        toggleMobileMenu();
-                      }}
-                    >
-                      Alumni Gallery
-                    </li>
-                    <li
-                      className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        navigate("/alumni/job-postings");
-                        toggleMobileMenu();
-                      }}
-                    >
-                      Jobs via Alumni
-                    </li>
-                    <li
-                      className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        navigate("/alumni/contact");
-                        toggleMobileMenu();
-                      }}
-                    >
-                      Contact Us
-                    </li>
+                    <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/prominent-alumni"); toggleMobileMenu(); }}>Prominent Alumni</li>
+                    <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/gallery"); toggleMobileMenu(); }}>Alumni Gallery</li>
+                    <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/job-postings"); toggleMobileMenu(); }}>Jobs via Alumni</li>
+                    <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/alumni/contact"); toggleMobileMenu(); }}>Contact Us</li>
+                    <li className="py-2 pl-4 text-[#172B4D] hover:bg-gray-100 rounded" onClick={() => { navigate("/blogs"); toggleMobileMenu(); }}>Alumni Blogs</li>
                   </ul>
                 </div>
               </li>
               <li>
-                <button
-                  className="w-full text-left text-[#172B4D]"
-                  onClick={() => {
-                    navigate("/directory");
-                    toggleMobileMenu();
-                  }}
-                >
-                  <div className="flex gap-3 items-center text-base font-medium">
-                    <FolderSharedIcon />
-                    Directory
+                <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/directory"); toggleMobileMenu(); }}>
+                  <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname === "/directory" ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                    <FolderSharedIcon />Directory
+                  </div>
+                </button>
+              </li>
+              {isLoggedIn && authUser?.role === 'student' && (
+                <li>
+                  <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/referrals"); toggleMobileMenu(); }}>
+                    <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname === "/referrals" ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                      <SendIcon />Referrals
+                      {unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ml-1.5">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </li>
+              )}
+              {isLoggedIn && authUser?.role === 'alumni' && (
+                <li>
+                  <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/referral-inbox"); toggleMobileMenu(); }}>
+                    <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname === "/referral-inbox" ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                      <InboxIcon />Referral inbox
+                      {unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ml-1.5">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </li>
+              )}
+              <li>
+                <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/events"); toggleMobileMenu(); }}>
+                  <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname === "/events" ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                    <EventIcon />Events
                   </div>
                 </button>
               </li>
               <li>
-                <button
-                  className="w-full text-left text-[#172B4D]"
-                  onClick={() => {
-                    navigate("/events");
-                    toggleMobileMenu();
-                  }}
-                >
-                  <div className="flex gap-3 items-center text-base font-medium">
-                    <EventIcon />
-                    Events
+                <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/news"); toggleMobileMenu(); }}>
+                  <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname === "/news" ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                    <FeedIcon />News
                   </div>
                 </button>
               </li>
               <li>
-                <button
-                  className="w-full text-left text-[#172B4D]"
-                  onClick={() => {
-                    navigate("/news");
-                    toggleMobileMenu();
-                  }}
-                >
-                  <div className="flex gap-3 items-center text-base font-medium">
-                    <FeedIcon />
-                    News
+                <button className="w-full text-left text-[#172B4D]" onClick={() => { navigate("/blogs"); toggleMobileMenu(); }}>
+                  <div className={`flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 ${pathname.startsWith("/blogs") ? "border-l-4 border-[#19194D]" : "border-l-4 border-transparent"}`}>
+                    <MenuBookIcon />Alumni Blogs
                   </div>
                 </button>
               </li>
               <li>
-                <button
-                  className="w-full text-left text-[#172B4D]"
-                  onClick={() => {
-                    window.open("https://tpcell.iiitkota.ac.in/", "_blank");
-                    toggleMobileMenu();
-                  }}
-                >
-                  <div className="flex gap-3 items-center text-base font-medium">
-                    <WorkIcon />
-                    Placements
+                <button className="w-full text-left text-[#172B4D]" onClick={() => { window.open("https://tpcell.iiitkota.ac.in/", "_blank"); toggleMobileMenu(); }}>
+                  <div className="flex gap-3 items-center text-base font-medium transition-all duration-300 pl-2 border-l-4 border-transparent">
+                    <WorkIcon />Placements
                   </div>
                 </button>
               </li>
               {isLoggedIn && user ? (
                 <>
                   <li className="w-full h-auto flex gap-3">
-                    {user.profilePicture ? (
-                      <button
-                        onClick={() => {
-                          navigate("/profile/me");
-                          toggleMobileMenu();
-                        }}
-                      >
-                        <img
-                          src={user.profilePicture}
-                          alt="Profile"
-                          className="w-6 h-6 rounded-full object-cover"
-                        />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          navigate("/profile/me");
-                          toggleMobileMenu();
-                        }}
-                      >
-                        <img
-                          src={Avatar}
-                          alt="Default Avatar"
-                          className="w-6 h-6 rounded-full object-cover"
-                        />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        navigate("/profile/me");
-                        toggleMobileMenu();
-                      }}
-                    >
-                      <div className="flex gap-3 items-center text-[#172B4D] text-base font-medium">
-                        Profile
-                      </div>
+                    <button onClick={() => { navigate("/profile/me"); toggleMobileMenu(); }}>
+                      <img src={user.profilePicture || Avatar} alt="Profile" className="w-6 h-6 rounded-full object-cover" />
+                    </button>
+                    <button onClick={() => { navigate("/profile/me"); toggleMobileMenu(); }}>
+                      <div className="flex gap-3 items-center text-[#172B4D] text-base font-medium">Profile</div>
                     </button>
                   </li>
                   <li>
                     <button onClick={openLogoutModal}>
                       <div className="flex gap-3 items-center text-[#172B4D] text-base font-medium">
-                        <LogoutIcon />
-                        Log Out
+                        <LogoutIcon />Log Out
                       </div>
                     </button>
                   </li>
                 </>
               ) : (
                 <li>
-                  <button
-                    onClick={() => {
-                      navigate("/signin");
-                      toggleMobileMenu();
-                    }}
-                  >
+                  <button onClick={() => { navigate("/signin"); toggleMobileMenu(); }}>
                     <div className="flex gap-3 items-center text-[#172B4D] text-base font-medium">
-                      <LockOpenIcon />
-                      Sign In
+                      <LockOpenIcon />Sign In
                     </div>
                   </button>
                 </li>
@@ -438,33 +481,14 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Logout Confirmation Modal */}
-      <Modal
-        open={isLogoutModalOpen}
-        onClose={closeLogoutModal}
-        aria-labelledby="logout-modal-title"
-        aria-describedby="logout-modal-description"
-      >
+      {/* Logout Modal */}
+      <Modal open={isLogoutModalOpen} onClose={closeLogoutModal} aria-labelledby="logout-modal-title" aria-describedby="logout-modal-description">
         <Box className="bg-white p-6 rounded shadow-lg w-80 mx-auto mt-24">
-          <h2 id="logout-modal-title" className="text-lg font-semibold mb-4">
-            Confirm Logout
-          </h2>
-          <p id="logout-modal-description" className="mb-6">
-            Are you sure you want to log out?
-          </p>
+          <h2 id="logout-modal-title" className="text-lg font-semibold mb-4">Confirm Logout</h2>
+          <p id="logout-modal-description" className="mb-6">Are you sure you want to log out?</p>
           <div className="flex justify-end gap-4">
-            <button
-              onClick={closeLogoutModal}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Log Out
-            </button>
+            <button onClick={closeLogoutModal} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+            <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Log Out</button>
           </div>
         </Box>
       </Modal>

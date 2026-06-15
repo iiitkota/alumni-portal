@@ -58,7 +58,7 @@ router.get('/preference', authMiddleware, async (req, res) => {
 
   } catch (err) {
 
-    res.send(500).json({ message: "server error", error: err.message })
+    res.status(500).json({ message: "server error", error: err.message })
 
   }
 
