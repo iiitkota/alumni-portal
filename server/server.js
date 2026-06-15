@@ -27,10 +27,6 @@ app.use(express.json());
 
 const corsOptions = {
   origin: [
-    'https://alumniportal-tau.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5175',
     'https://alumni.iiitkota.ac.in',
     'https://www.alumni.iiitkota.ac.in',
     'http://alumni.iiitkota.ac.in',
