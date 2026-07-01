@@ -34,6 +34,7 @@ app.use(express.json());
 const corsOptions = {
   origin: [
     'https://alumni.iiitkota.ac.in',
+    'https://alumni.iiitkota.ac.in',
     'https://www.alumni.iiitkota.ac.in',
     'http://alumni.iiitkota.ac.in',
     'http://www.alumni.iiitkota.ac.in',
@@ -41,7 +42,8 @@ const corsOptions = {
     'http://*.alumni.iiitkota.ac.in',
     'http://*.iiitkota.ac.in',
     'https://*.iiitkota.ac.in',
-  ],
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 200

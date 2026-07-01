@@ -568,7 +568,7 @@ router.delete('/alumni/:id', verifyAdmin, async (req, res) => {
   }
 });
 
-const multer = require('multer');
+
 const adminBlogController = require('../controllers/adminBlogController');
 const blogCoverUpload = multer({
   storage: multer.memoryStorage(),
