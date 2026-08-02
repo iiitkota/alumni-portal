@@ -285,7 +285,7 @@ exports.sendMessage = async (req, res) => {
 
     // Emit new message via Socket.io
     try {
-      const { io } = require('../server');
+      const io = req.app.get('io');
       io.to(request._id.toString()).emit('new_message', message);
     } catch (err) {
       // Socket.io not available — graceful fallback, message still saved

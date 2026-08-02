@@ -53,6 +53,8 @@ const io = new Server(httpServer, {
   cors: { origin: corsOptions.origin, credentials: true }
 });
 
+app.set('io', io);
+
 require('./sockets/chat')(io);
 
 app.use((req, res, next) => {
@@ -68,10 +70,7 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 
 mongoose
-  .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Failed to connect to MongoDB", err));
 
@@ -96,4 +95,3 @@ httpServer.listen(PORT, () => {
 
 require('./crons');
 
-module.exports = { app, io };
