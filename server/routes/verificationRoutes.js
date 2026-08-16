@@ -9,6 +9,9 @@ const { sendVerificationEmail } = require('../utils/emailUtil');
 router.post('/request-code', async (req, res) => {
   try {
     const { instituteId } = req.body;
+    if (!instituteId) {
+      return res.status(400).json({ message: 'Institute ID is required' });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ instituteId });
@@ -56,7 +59,7 @@ router.post('/request-code', async (req, res) => {
     });
   } catch (error) {
     console.error('Error sending verification code:', error);
-    res.status(500).json({ message: 'Failed to send verification code' });
+    res.status(500).json({ message: error.message || 'Failed to send verification code' });
   }
 });
 
