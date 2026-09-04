@@ -34,7 +34,11 @@ exports.registerStudent = async (req, res) => {
     });
 
     if (existingStudent) {
-      return res.status(400).json({ message: 'Student with this institute ID or email already exists' });
+      if (existingStudent.isVerified) {
+        return res.status(400).json({ message: 'Student with this institute ID or email already exists' });
+      }
+      // If student is not verified, delete the old record to allow registration retry
+      await Student.deleteOne({ _id: existingStudent._id });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -66,12 +70,28 @@ exports.registerStudent = async (req, res) => {
       html: `<p>Your verification OTP is <b>${otp}</b>. It is valid for 10 minutes.</p>`
     };
 
-    await transporter.sendMail(mailOptions);
+    console.log(`\n========================================`);
+    console.log(`Attempting to send verification email...`);
+    console.log(`Recipient: ${personalEmail}`);
+    console.log(`Verification OTP: ${otp}`);
+    console.log(`========================================\n`);
+
+    // Send email in the background without blocking the API response
+    transporter.sendMail(mailOptions).catch((error) => {
+      console.log(`\n========================================`);
+      console.log(`Email delivery failed via Nodemailer.`);
+      console.log(`Recipient: ${personalEmail}`);
+      console.log(`Reason: ${error.code || error.message}`);
+      console.log(`========================================\n`);
+    });
 
     return res.status(200).json({ message: 'OTP sent to your email' });
   } catch (error) {
     console.error('Error registering student:', error);
-    return res.status(500).json({ message: 'Server error' });
+    if (error.name === 'ValidationError') {
+       return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
