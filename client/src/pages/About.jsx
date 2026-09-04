@@ -2,92 +2,75 @@ import Navbar from "../components/navbar.jsx";
 import iiitkotalogo from "../assets/iiitkotalogo.png"; // Update path as needed
 import Footer from "../components/Footer.jsx";
 import ProfileCard from "../components/TeamCard.jsx";
-import Hiteshwar from "../assets/hiteshwar_kk.jpeg";
-import Kratin from "../assets/kratin_agarwal_img.jpeg";
 import Chetna from "../assets/chetna_ma'am.jpeg";
-import Partik from "../assets/partik_malasi.jpeg";
-import Dean from "../../public/assets/dean.png";
+import Shelly from "../assets/Shelly.webp";
+import Dean from "../assets/dean.png";
+import Amishka from "../assets/AmishkaSrivastava.jpg";
+import Uday from "../assets/UdaySingh.jpg";
+import Arijit from "../assets/arijitAjayKumar.png";
+import Nitesh from "../assets/niteshDixit.png";
+import Chirag from "../assets/Chirag.jpg";
 
-import Dhiraj from "../assets/dhirajKushwaha.png"
-import Arijit from "../assets/arijitAjayKumar.png"
-import Nitesh from "../assets/niteshDixit.png"
-import Mahak from "../assets/mahakGupta.png"
-import Prachi from "../assets/prachiGupta.png"
 
 
 
 
 const profiles = [
   {
-    name: "Hiteshwar Kaushik",
+    name: "Arijit Ajay Kumar",
     occupation: "4th Year CSE",
-    image: Hiteshwar,
-    linkedin: "https://www.linkedin.com/in/hiteshwarkaushik/",
-    github: "https://www.github.com/coderkaushik",
-    email: "hiteshwarkaushik@gmail.com",
-  },
-  {
-    name: "Partik Malasi",
-    occupation: "4th Year CSE",
-    image: Partik,
-    linkedin: "https://www.linkedin.com/in/partik-malasi-736686249/",
-    github: "https://github.com/PartikMalasi",
-    email: "partik.work@gmail.com",
-  },
-  {
-    name: "Kratin Aggrawal",
-    occupation: "4th Year CSE",
-    image: Kratin,
-    linkedin: "https://www.linkedin.com/in/kratin-aggarwal-691157257/",
-    github: "https://www.github.com/coderkaushik",
-    email: "kratin@example.com",
-  },
-
-  {
-    name:"Arijit Ajay Kumar",
-    occupation: "3rd Year CSE",
     image: Arijit,
-    linkedin:"https://www.linkedin.com/in/arijitajaykumar/",
-    github:"https://github.com/techAkki-CMD",
-    email:"arijitajay.kumar@gmail.com"
+    linkedin: "https://www.linkedin.com/in/arijitajaykumar/",
+    github: "https://github.com/techAkki-CMD",
+    email: "arijitajay.kumar@gmail.com"
   },
 
   {
-    name:"Nitesh Dixit",
-    occupation: "3rd Year ECE",
+    name: "Nitesh Dixit",
+    occupation: "4th Year ECE",
     image: Nitesh,
-    linkedin:"https://www.linkedin.com/in/nitesh-kumar-680525290/",
-    github:"https://github.com/FlopCoder35",
-    email:"niteshdixit8957@gmail.com"
-  },
-
-   
-  {
-    name:"Dhiraj Kushwaha",
-    occupation: "2nd Year AIDE",
-    image: Dhiraj,
-    linkedin:"https://www.linkedin.com/in/dhirajkushwaha/",
-    github:"https://github.com/dhirajkushwaha",
-    email:"dhirajk.contact@gmail.com"
+    linkedin: "https://www.linkedin.com/in/nitesh-kumar-680525290/",
+    github: "https://github.com/FlopCoder35",
+    email: "niteshdixit8957@gmail.com"
   },
 
   {
-    name:"Mahak Gupta",
-    occupation: "2nd Year CSE",
-    image: Mahak,
-    linkedin:"https://www.linkedin.com/in/mahak-gupta-718a86323/",
-    github:"https://github.com/MahakGupta390",
-    email:"mahakgupta985@gmail"
+    name: "Chirag Singh",
+    occupation: "3rd Year CSE",
+    image: Chirag,
+    linkedin: "https://www.linkedin.com/in/chirag-singh-51a775324/",
+    github: "",
+    email: ""
+  },
+  {
+    name: "Uday Singh",
+    occupation: "3rd Year CSE",
+    image: Uday,
+    linkedin: "https://www.linkedin.com/in/uday-singh-17915b215/",
+    github: "",
+    email: ""
+  },
+  {
+    name: "Amishka Srivastava",
+    occupation: "2d Year CSE",
+    image: Amishka,
+    linkedin: "https://www.linkedin.com/in/amishka-srivastava-86055137b/",
+    github: "",
+    email: ""
   },
 
   {
-    name:"Prachi Gupta",
-    occupation: "2nd Year CSE",
-    image: Prachi,
-    linkedin:"https://www.linkedin.com/in/prachi-gupta-74122a324",
-    github:"https://github.com/Prachi-Gupta2808",
-    email:"prachig2808@gmail.com"
-  } 
+    name: "Shelly Negi",
+    occupation: "2d Year CSE",
+    image: Shelly,
+    linkedin: "https://www.linkedin.com/in/shelly-chaaras-b55b90383/",
+    github: "",
+    email: ""
+  }
+
+
+
+
 
 ];
 
