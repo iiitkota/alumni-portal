@@ -151,7 +151,7 @@ const Navbar = () => {
       setIsLoggedIn(true);
       const fetchUser = async () => {
         try {
-          const APIHOST = import.meta.env.VITE_API_URL || "https://alumni-api.iiitkota.ac.in";
+          const APIHOST = import.meta.env.VITE_API_URL || "http://localhost:7034";
           let role = authUser?.role;
           if (!role && token) {
             try {
