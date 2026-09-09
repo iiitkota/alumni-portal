@@ -19,7 +19,7 @@ const cloudinary = require('../config/cloudinary');
 const streamifier = require('streamifier');
 const Story = require('../models/Story');
 const memoryUpload = multer({ storage: multer.memoryStorage() });
-const { v4: uuidv4 } = require('uuid');  
+const { v4: uuidv4 } = require('uuid');
 const renameFilesWithPostId = require("../utils/renameFilesWithPostId");
 
 
@@ -34,21 +34,21 @@ const {
 } = require('../utils/referralAdminStats');
 
 const ADMIN_KEY_HASH = process.env.ADMIN_KEY_HASH;
-const ADMINSECRET = process.env.ADMINSECRET  ;
+const ADMINSECRET = process.env.ADMINSECRET;
 const TOKEN_EXPIRY_MS = 60 * 60 * 1000;
 
 if (!ADMIN_KEY_HASH || !ADMINSECRET) {
-    throw new Error("FATAL ERROR: Required environment variables are not set.");
+  throw new Error("FATAL ERROR: Required environment variables are not set.");
 }
 
- 
+
 
 
 // api/admin/login
-router.post("/login",  async (req,res)=>{
+router.post("/login", async (req, res) => {
 
-  
-  const {key} = req.body;
+
+  const { key } = req.body;
 
   if (!key) {
     return res.status(400).json({ success: false, message: "Key is required" });
@@ -126,14 +126,14 @@ router.post("/eventposts", verifyAdmin, upload.array("images"), async (req, res)
 
     res.status(201).json(eventPost);
   } catch (error) {
-    res.status(400).json({ error: error.message }); 
+    res.status(400).json({ error: error.message });
   }
 });
 
 
 
 
-router.get("/eventposts",  async (req, res) => {
+router.get("/eventposts", async (req, res) => {
   try {
     const { page = 1, limit = 10, title, description, details, date } = req.query;
 
@@ -157,7 +157,7 @@ router.get("/eventposts",  async (req, res) => {
     res.status(500).json({ error: "Failed to fetch event posts" });
   }
 });
- 
+
 
 
 router.put('/eventposts/:id', verifyAdmin, upload.array('images', 5), async (req, res) => {
@@ -180,7 +180,7 @@ router.put('/eventposts/:id', verifyAdmin, upload.array('images', 5), async (req
     // Delete images if requested
     if (deletedImages) {
       const toDelete = JSON.parse(deletedImages);
-        // console.log("Deleting images:", toDelete);
+      // console.log("Deleting images:", toDelete);
       post.images = post.images.filter(img => {
         if (toDelete.includes(img.uid)) {
           const filePath = path.join(__dirname, '..', img.path);
@@ -195,7 +195,7 @@ router.put('/eventposts/:id', verifyAdmin, upload.array('images', 5), async (req
     if (req.files && req.files.length > 0) {
       const newImgs = req.files.map(file => ({
         filename: file.filename,
-        path: '/' +  file.path.replace(/\\/g, '/'),
+        path: '/' + file.path.replace(/\\/g, '/'),
         uid: file.filename,
       }));
       post.images.push(...newImgs);
@@ -219,7 +219,7 @@ router.delete('/eventposts/:id', verifyAdmin, async (req, res) => {
     if (!event) return res.status(404).json({ error: 'Event post not found' });
 
     // Delete associated image files from disk
- 
+
 
     if (event.images && event.images.length > 0) {
       for (const img of event.images) {
@@ -230,7 +230,7 @@ router.delete('/eventposts/:id', verifyAdmin, async (req, res) => {
       }
     }
 
- 
+
 
     await Event.findByIdAndDelete(eventId);
 
@@ -255,7 +255,7 @@ router.delete('/eventposts/:id', verifyAdmin, async (req, res) => {
 
 
 //  Fetch the news
-router.get('/news',  async (req, res) => {
+router.get('/news', async (req, res) => {
 
   try {
 
@@ -276,7 +276,7 @@ router.get('/news',  async (req, res) => {
     const skip = (page - 1) * limit;
 
     const news = await News.find(filter)
-    .sort({postedOn:-1})
+      .sort({ postedOn: -1 })
       .select('title content postedOn')
       .skip(skip)
       .limit(Number(limit))

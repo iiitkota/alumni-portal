@@ -27,21 +27,16 @@ const { Server } = require('socket.io');
 const app = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 7034;
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/alumni-portal";
 
 app.use(express.json());
 
 const corsOptions = {
   origin: [
     'https://alumni.iiitkota.ac.in',
-    'https://alumni.iiitkota.ac.in',
     'https://www.alumni.iiitkota.ac.in',
     'http://alumni.iiitkota.ac.in',
     'http://www.alumni.iiitkota.ac.in',
-    'https://*.alumni.iiitkota.ac.in',
-    'http://*.alumni.iiitkota.ac.in',
-    'http://*.iiitkota.ac.in',
-    'https://*.iiitkota.ac.in',
     process.env.CLIENT_URL
   ].filter(Boolean),
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",

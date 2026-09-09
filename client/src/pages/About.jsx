@@ -10,8 +10,10 @@ import Uday from "../assets/UdaySingh.jpg";
 import Arijit from "../assets/arijitAjayKumar.png";
 import Nitesh from "../assets/niteshDixit.png";
 import Chirag from "../assets/Chirag.jpg";
-
-
+import Chandan from "../assets/Chandan.jpg";
+import Kritharth from "../assets/Kritarth.jpg";
+import Aman from "../assets/aman.png"
+import OM from "../assets/OM.png"
 
 
 
@@ -39,34 +41,63 @@ const profiles = [
     occupation: "3rd Year CSE",
     image: Chirag,
     linkedin: "https://www.linkedin.com/in/chirag-singh-51a775324/",
-    github: "",
-    email: ""
+    github: "https://github.com/Chiragsinghh",
+    email: "chiragcse05@gmail.com"
   },
   {
     name: "Uday Singh",
     occupation: "3rd Year CSE",
     image: Uday,
     linkedin: "https://www.linkedin.com/in/uday-singh-17915b215/",
-    github: "",
-    email: ""
+    github: "https://github.com/Immortal0006",
+    email: "udconqueror@gmail.com"
   },
   {
+    name: "Om Upadhyay",
+    occupation: "3rd Year CSE",
+    image: OM,
+    linkedin: "linkedin.com/in/om-upadhyay-7a235831b",
+    email: "om12upadhyay@gmail.com"
+  },
+
+  {
     name: "Amishka Srivastava",
-    occupation: "2d Year CSE",
+    occupation: "2nd Year CSE",
     image: Amishka,
     linkedin: "https://www.linkedin.com/in/amishka-srivastava-86055137b/",
-    github: "",
-    email: ""
+    email: "srivastavaamishka@gmail.com"
   },
 
   {
     name: "Shelly Negi",
-    occupation: "2d Year CSE",
+    occupation: "2nd Year ECE",
     image: Shelly,
     linkedin: "https://www.linkedin.com/in/shelly-chaaras-b55b90383/",
-    github: "",
-    email: ""
+    email: "shellychaaras@gmail.com"
+  },
+
+  {
+    name: "Kritarth Gupta",
+    occupation: "2nd Year ECE",
+    image: Kritharth,
+    linkedin: "https://www.linkedin.com/in/kritarth-gupta-81ab21316/",
+    email: "v.krith.05@gmail.com"
+  },
+
+  {
+    name: "Chandan",
+    occupation: "2nd Year ECE",
+    image: Chandan,
+  },
+  {
+    name: "Aman Tiwari",
+    occupation: "2nd Year AIDE",
+    image: Aman,
+    linkedin: "linkedin.com/in/aman-ktiwari",
+    email: "tamit9272@gmail.com"
   }
+
+
 
 
 
