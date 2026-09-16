@@ -14,6 +14,8 @@ import Chandan from "../assets/Chandan.jpg";
 import Kritharth from "../assets/Kritarth.jpg";
 import Aman from "../assets/aman.png"
 import OM from "../assets/OM.png"
+import Dhruvi from "../assets/Dhruvi.jpg"
+import Lovepreet from "../assets/Lovepreet.jpeg"
 
 
 
@@ -61,11 +63,24 @@ const profiles = [
   },
 
   {
+    name: "Lovepreet Singh",
+    occupation: "3rd Year AIDE",
+    image: Lovepreet,
+    linkedin: "https://www.linkedin.com/in/lovepreetibis/",
+  },
+
+  {
     name: "Amishka Srivastava",
     occupation: "2nd Year CSE",
     image: Amishka,
     linkedin: "https://www.linkedin.com/in/amishka-srivastava-86055137b/",
     email: "srivastavaamishka@gmail.com"
+  },
+  {
+    name: "Dhruvi Purohit",
+    occupation: "2nd Year CSE",
+    image: Dhruvi,
+    linkedin: "http://linkedin.com/in/dhruvi-purohit-3b9a76381/",
   },
 
   {
