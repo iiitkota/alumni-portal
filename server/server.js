@@ -31,14 +31,22 @@ const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb
 
 app.use(express.json());
 
+const allowedOrigins = [
+  'https://alumni.iiitkota.ac.in',
+  'https://www.alumni.iiitkota.ac.in',
+  'http://alumni.iiitkota.ac.in',
+  'http://www.alumni.iiitkota.ac.in',
+  process.env.CLIENT_URL
+].filter(Boolean);
+
 const corsOptions = {
-  origin: [
-    'https://alumni.iiitkota.ac.in',
-    'https://www.alumni.iiitkota.ac.in',
-    'http://alumni.iiitkota.ac.in',
-    'http://www.alumni.iiitkota.ac.in',
-    process.env.CLIENT_URL
-  ].filter(Boolean),
+  origin: (origin, callback) => {
+    if (!origin || /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 200
@@ -55,9 +63,6 @@ require('./sockets/chat')(io);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   console.log(`${req.method} ${req.url} - Origin: ${origin}`);
-  if (origin && !corsOptions.origin.includes(origin)) {
-    console.log('CORS Rejected for origin:', origin);
-  }
   next();
 });
 

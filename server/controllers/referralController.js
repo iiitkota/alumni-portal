@@ -15,29 +15,68 @@ exports.sendReferralRequest = async (req, res) => {
       return res.status(400).json({ message: 'Resume file is required.' });
     }
 
-    // Upload resume to Cloudinary
-    // Works with both memoryStorage (buffer) and diskStorage (path)
+    // Upload resume to Cloudinary or fallback to local disk storage
     let uploadResult;
-    try {
-      let uploadSource;
-      if (req.file.buffer) {
-        uploadSource = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      } else if (req.file.path) {
-        uploadSource = req.file.path;
-      } else {
-        return res.status(400).json({ message: 'Resume file could not be processed.' });
-      }
+    const fs = require('fs');
+    const path = require('path');
 
-      uploadResult = await cloudinary.uploader.upload(uploadSource, {
-        folder: 'iiitk-referral-resumes',
-        resource_type: 'auto',
-        use_filename: true,
-        unique_filename: true,
-        access_mode: 'public',
-      });
-    } catch (uploadError) {
-      console.error('Cloudinary upload error:', uploadError);
-      return res.status(500).json({ message: 'Failed to upload resume. Please try again.' });
+    const hasCloudinaryConfig = Boolean(
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+    );
+
+    if (hasCloudinaryConfig) {
+      try {
+        let uploadSource;
+        if (req.file.buffer) {
+          uploadSource = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+        } else if (req.file.path) {
+          uploadSource = req.file.path;
+        } else {
+          return res.status(400).json({ message: 'Resume file could not be processed.' });
+        }
+
+        uploadResult = await cloudinary.uploader.upload(uploadSource, {
+          folder: 'iiitk-referral-resumes',
+          resource_type: 'auto',
+          use_filename: true,
+          unique_filename: true,
+          access_mode: 'public',
+        });
+      } catch (uploadError) {
+        console.error('Cloudinary upload failed, using local storage fallback:', uploadError);
+      }
+    }
+
+    // Fallback to local storage if Cloudinary is not configured or failed
+    if (!uploadResult) {
+      try {
+        const uploadsDir = path.join(__dirname, '../uploads/resumes');
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        const filename = `resume-${Date.now()}-${Math.round(Math.random() * 1e9)}.pdf`;
+        const filePath = path.join(uploadsDir, filename);
+
+        if (req.file.buffer) {
+          fs.writeFileSync(filePath, req.file.buffer);
+        } else if (req.file.path) {
+          fs.copyFileSync(req.file.path, filePath);
+        } else {
+          return res.status(400).json({ message: 'Resume file could not be processed.' });
+        }
+
+        const hostUrl = `${req.protocol}://${req.get('host')}`;
+        uploadResult = {
+          secure_url: `${hostUrl}/uploads/resumes/${filename}`,
+          public_id: filename,
+          isLocal: true,
+        };
+      } catch (fallbackError) {
+        console.error('Local file save error:', fallbackError);
+        return res.status(500).json({ message: 'Failed to upload resume. Please try again.' });
+      }
     }
 
     // Assign through service (keeps queue logic and handles notifications)
@@ -54,9 +93,14 @@ exports.sendReferralRequest = async (req, res) => {
     if (!alumni) {
       // Clean up the uploaded resume since no alumni is available
       try {
-        await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: 'auto' });
+        if (uploadResult.isLocal) {
+          const filePath = path.join(__dirname, '../uploads/resumes', uploadResult.public_id);
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } else {
+          await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: 'auto' });
+        }
       } catch (err) {
-        console.error('Error deleting unused resume from Cloudinary:', err);
+        console.error('Error deleting unused resume:', err);
       }
 
       return res.status(404).json({
