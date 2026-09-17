@@ -15,7 +15,7 @@ import Kritharth from "../assets/Kritarth.jpg";
 import Aman from "../assets/aman.png"
 import OM from "../assets/OM.png"
 import Dhruvi from "../assets/Dhruvi.jpg"
-import Lovepreet from "../assets/Lovepreet.jpeg"
+import Lovepreet from "../assets/lovepreet.jpeg"
 
 
 
