@@ -38,6 +38,16 @@ export function StudentList() {
   const [sortBy, setSortBy] = useState("");
   const [fetchError, setFetchError] = useState("");
 
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    instituteId: "",
+    personalEmail: "",
+    branch: "",
+    graduationYear: "",
+    linkedin: "",
+  });
+
   const fetchStudents = async () => {
     try {
       setLoading(true);
@@ -69,6 +79,48 @@ export function StudentList() {
   useEffect(() => {
     fetchStudents();
   }, [currentPage, itemsPerPage, appliedFilters, sortBy]);
+
+  const handleEdit = (student) => {
+    setEditingId(student._id);
+    setFormData({
+      name: student.name || "",
+      instituteId: student.instituteId || "",
+      personalEmail: student.personalEmail || "",
+      branch: student.branch || "",
+      graduationYear: student.graduationYear || "",
+      linkedin: student.linkedin || "",
+    });
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const apiUrl = APIHOST || "http://localhost:7034";
+      await axios.put(`${apiUrl}/api/admin/students/${editingId}`, formData);
+      setStudents((prev) =>
+        prev.map((s) => (s._id === editingId ? { ...s, ...formData } : s))
+      );
+      setEditingId(null);
+    } catch (error) {
+      console.error("Error updating student:", error);
+      alert(error.response?.data?.error || "Failed to update student.");
+    }
+  };
+
+  const handleDelete = async (studentId) => {
+    if (!window.confirm("Are you sure you want to delete this student record?")) return;
+    try {
+      const apiUrl = APIHOST || "http://localhost:7034";
+      await axios.delete(`${apiUrl}/api/admin/students/${studentId}`);
+      setStudents((prev) => prev.filter((s) => s._id !== studentId));
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      alert(error.response?.data?.error || "Failed to delete student.");
+    }
+  };
 
   return (
     <div>
@@ -171,7 +223,7 @@ export function StudentList() {
       </div>
 
       <div className="overflow-x-scroll px-4">
-        <div className="mt-5 mb-1 ml-[20px] flex text-sm font-medium">
+        <div className="mt-5 mb-1 ml-[120px] flex text-sm font-medium">
           <p className="min-w-[120px] max-w-[120px]">Name</p>
           <p className="min-w-[100px] max-w-[100px]">Institute Id</p>
           <p className="min-w-[140px] max-w-[140px]">Personal Email</p>
@@ -199,24 +251,87 @@ export function StudentList() {
           ) : (
             students.map((student) => (
               <div key={student._id} className="flex items-center text-sm">
-                <p className="min-w-[120px] max-w-[120px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] line-clamp-1">
-                  {student.name}
-                </p>
-                <p className="min-w-[100px] max-w-[100px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]">
-                  {student.instituteId}
-                </p>
-                <p className="min-w-[140px] max-w-[140px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] line-clamp-1">
-                  {student.personalEmail}
-                </p>
-                <p className="min-w-[60px] max-w-[60px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]">
-                  {student.branch}
-                </p>
-                <p className="min-w-[60px] max-w-[60px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]">
-                  {student.graduationYear}
-                </p>
-                <p className="min-w-[120px] max-w-[120px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] line-clamp-1 overflow-hidden">
-                  {student.linkedin || "—"}
-                </p>
+                {/* Actions: Edit / Save / Delete */}
+                {editingId === student._id ? (
+                  <button
+                    onClick={handleSave}
+                    className="bg-green-500 text-white w-[50px] px-[5px] py-[1px] hover:opacity-80 rounded-full text-xs"
+                  >
+                    Save
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleEdit(student)}
+                    className="bg-black text-white w-[50px] px-[5px] py-[1px] rounded-full hover:opacity-80 text-xs"
+                  >
+                    Edit
+                  </button>
+                )}
+
+                <button
+                  onClick={() => handleDelete(student._id)}
+                  className="bg-red-600 text-white mx-2 rounded w-[54px] px-[7px] py-[1px] rounded-full hover:opacity-80 text-xs"
+                >
+                  Delete
+                </button>
+
+                {/* Display/Edit Fields */}
+                {editingId === student._id ? (
+                  <>
+                    <input
+                      className="p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] min-w-[120px] max-w-[120px]"
+                      value={formData.name}
+                      onChange={(e) => handleChange("name", e.target.value)}
+                    />
+                    <input
+                      className="p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] min-w-[100px] max-w-[100px]"
+                      value={formData.instituteId}
+                      onChange={(e) => handleChange("instituteId", e.target.value)}
+                    />
+                    <input
+                      className="p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] min-w-[140px] max-w-[140px]"
+                      value={formData.personalEmail}
+                      onChange={(e) => handleChange("personalEmail", e.target.value)}
+                    />
+                    <input
+                      className="p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] min-w-[60px] max-w-[60px]"
+                      value={formData.branch}
+                      onChange={(e) => handleChange("branch", e.target.value)}
+                    />
+                    <input
+                      className="p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] min-w-[60px] max-w-[60px]"
+                      value={formData.graduationYear}
+                      onChange={(e) => handleChange("graduationYear", e.target.value)}
+                    />
+                    <input
+                      className="p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] min-w-[120px] max-w-[120px]"
+                      value={formData.linkedin}
+                      onChange={(e) => handleChange("linkedin", e.target.value)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <p className="min-w-[120px] max-w-[120px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] line-clamp-1">
+                      {student.name}
+                    </p>
+                    <p className="min-w-[100px] max-w-[100px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]">
+                      {student.instituteId}
+                    </p>
+                    <p className="min-w-[140px] max-w-[140px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] line-clamp-1">
+                      {student.personalEmail}
+                    </p>
+                    <p className="min-w-[60px] max-w-[60px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]">
+                      {student.branch}
+                    </p>
+                    <p className="min-w-[60px] max-w-[60px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2]">
+                      {student.graduationYear}
+                    </p>
+                    <p className="min-w-[120px] max-w-[120px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] line-clamp-1 overflow-hidden">
+                      {student.linkedin || "—"}
+                    </p>
+                  </>
+                )}
+
                 <p className="min-w-[70px] max-w-[70px] p-[2px] bg-[#fcfcfc] border border-[#e2e2e2] text-center">
                   {student.totalReferralRequestsSent ?? 0}
                 </p>

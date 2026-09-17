@@ -156,21 +156,32 @@ exports.withdrawRequest = async (req, res) => {
     request.withdrawnAt = new Date();
     await request.save();
 
-    // Delete the resume from Cloudinary
+    // Delete the resume (Cloudinary or local file)
     if (request.resumePublicId) {
       try {
-        await cloudinary.uploader.destroy(request.resumePublicId, { resource_type: 'auto' });
+        const hasCloudinaryConfig = Boolean(
+          process.env.CLOUDINARY_CLOUD_NAME &&
+          process.env.CLOUDINARY_API_KEY &&
+          process.env.CLOUDINARY_API_SECRET
+        );
+        if (hasCloudinaryConfig) {
+          await cloudinary.uploader.destroy(request.resumePublicId, { resource_type: 'auto' });
+        } else {
+          const fs = require('fs');
+          const path = require('path');
+          const filePath = path.join(__dirname, '../uploads/resumes', request.resumePublicId);
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        }
       } catch (err) {
-        console.error('Error deleting resume from Cloudinary during withdrawal:', err);
+        console.error('Error deleting resume during withdrawal:', err);
       }
     }
 
     // Decrement alumni's referralsReceivedThisWeek (min 0)
-    const alumni = await Alumni.findById(request.alumni);
-    if (alumni) {
-      alumni.referralsReceivedThisWeek = Math.max(0, (alumni.referralsReceivedThisWeek || 0) - 1);
-      await alumni.save();
-    }
+    await Alumni.updateOne(
+      { _id: request.alumni, referralsReceivedThisWeek: { $gt: 0 } },
+      { $inc: { referralsReceivedThisWeek: -1 } }
+    );
 
     return res.status(200).json({ message: 'Request withdrawn' });
   } catch (error) {

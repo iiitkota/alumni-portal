@@ -4,9 +4,8 @@ import Logo from "../assets/iiitkotalogo.png";
 import { NewsList } from "./AdminNews";
 import { AdminEvents } from "./AdminEvents";
 import { AlumniList } from "./AdminAlumni";
-import { AdminStories } from "./AdminStories";
-axios.defaults.withCredentials = true;
 import axios from "axios";
+axios.defaults.withCredentials = true;
  
 let APIHOST = import.meta.env.VITE_API_URL
 
