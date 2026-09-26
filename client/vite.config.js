@@ -14,12 +14,4 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  // Ensure Vite handles SPA routing
-  esbuild: {
-    jsxInject: `import React from 'react'`,
-  },
-  // Add this to handle SPA routing
-  optimizeDeps: {
-    include: ['react', 'react-dom'],
-  },
 });
