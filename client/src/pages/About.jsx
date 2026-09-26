@@ -4,7 +4,6 @@ import Footer from "../components/Footer.jsx";
 import ProfileCard from "../components/TeamCard.jsx";
 import Chetna from "../assets/chetna_ma'am.jpeg";
 import Shelly from "../assets/Shelly.webp";
-import Dean from "../assets/dean.png";
 import Amishka from "../assets/AmishkaSrivastava.jpg";
 import Uday from "../assets/UdaySingh.jpg";
 import Arijit from "../assets/arijitAjayKumar.png";
@@ -16,7 +15,7 @@ import Aman from "../assets/aman.png";
 import OM from "../assets/OM.png";
 import Dhruvi from "../assets/Dhruvi.jpg";
 import Lovepreet from "../assets/lovepreet.jpeg";
-import sumitkumarsonkar from "../assets/sumikumarsonkar.png";
+import sumikumarsonkar from "../assets/sumikumarsonkar.png";
 
 
 const seniorCoordinators = [
@@ -205,7 +204,7 @@ const About = () => {
               <ProfileCard
                 name="Dr. Sumit Kumar Sonkar"
                 occupation="Dean, Alumni and Industry Outreach"
-                image={sumitkumarsonkar}
+                image={sumikumarsonkar}
                 linkedin="https://www.linkedin.com/in/sumit-sonkar-023721273/"
                 email="dean@iiitkota.ac.in"
               />
