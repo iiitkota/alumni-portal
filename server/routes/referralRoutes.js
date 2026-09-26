@@ -11,7 +11,8 @@ const {
   setWeeklyLimit,
   getMessages,
   sendMessage,
-  getUnreadCount
+  getUnreadCount,
+  getResume
 } = require('../controllers/referralController');
 
 // Multer memory storage configuration for raw resume file uploading
@@ -28,6 +29,9 @@ const upload = multer({
 router.post('/request', authenticateStudent, upload.single('resume'), sendReferralRequest);
 router.get('/my-requests', authenticateStudent, getMyRequests);
 router.delete('/request/:id/withdraw', authenticateStudent, withdrawRequest);
+
+// Resume Route (Shared/Public via Direct Link)
+router.get('/request/:id/resume', getResume);
 
 // Alumni Referral Routes
 router.get('/inbox', authenticateAlumni, getAlumniInbox);

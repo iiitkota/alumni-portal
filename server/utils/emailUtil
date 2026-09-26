@@ -5,26 +5,29 @@ require('dotenv').config();
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS EXISTS:", !!process.env.EMAIL_PASS);
 
-// Create a transporter object using SMTP transport
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-    
-  },
-});
+const getTransporter = () => {
+  const user = (process.env.EMAIL_USER || process.env.MAIL_USER || '').trim();
+  const pass = (process.env.EMAIL_PASS || process.env.MAIL_PASS || '').replace(/\s+/g, '');
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user, pass },
+    tls: { rejectUnauthorized: false }
+  });
+};
 
 // Function to send verification email
 const sendVerificationEmail = (to, subject, html) => {
+  const user = (process.env.EMAIL_USER || process.env.MAIL_USER || '').trim();
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: user,
     to,
     subject,
     html,
   };
 
-  return transporter.sendMail(mailOptions);
+  return getTransporter().sendMail(mailOptions);
 };
 
 // Function to send welcome email
@@ -60,7 +63,7 @@ Email: chetna.ece@iiitkota.ac.in
 Contact No.: 9549650234`,
   };
 
-  return transporter.sendMail(mailOptions);
+  return getTransporter().sendMail(mailOptions);
 };
 
 const sendReferralNotificationEmail = ({
@@ -90,7 +93,7 @@ const sendReferralNotificationEmail = ({
     : '';
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: (process.env.EMAIL_USER || process.env.MAIL_USER || '').trim(),
     to: alumniEmail,
     subject: `New Referral Request Assigned - ${company}`,
     text: `Dear ${alumniName},
@@ -103,7 +106,7 @@ Student Name: ${studentName}
 Target Company: ${company}
 
 Resume Link:
-${resumeUrl}${optionalBlock}
+${(resumeUrl || '').replace(/^http:(?!\/\/(localhost|127\.0\.0\.1))/, 'https:')}${optionalBlock}
 
 You can review and respond to this referral request directly from your referral dashboard:
 
@@ -124,7 +127,7 @@ Email: chetna.ece@iiitkota.ac.in
 Contact No.: 9549650234`
   };
 
-  return transporter.sendMail(mailOptions);
+  return getTransporter().sendMail(mailOptions);
 };
   
 

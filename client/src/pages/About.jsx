@@ -12,35 +12,42 @@ import Nitesh from "../assets/niteshDixit.png";
 import Chirag from "../assets/Chirag.jpg";
 import Chandan from "../assets/Chandan.jpg";
 import Kritharth from "../assets/Kritarth.jpg";
-import Aman from "../assets/aman.png"
-import OM from "../assets/OM.png"
-import Dhruvi from "../assets/Dhruvi.jpg"
-import Lovepreet from "../assets/lovepreet.jpeg"
+import Aman from "../assets/aman.png";
+import OM from "../assets/OM.png";
+import Dhruvi from "../assets/Dhruvi.jpg";
+import Lovepreet from "../assets/lovepreet.jpeg";
+import sumitkumarsonkar from "../assets/sumikumarsonkar.png";
 
 
-
-const profiles = [
+const seniorCoordinators = [
   {
     name: "Arijit Ajay Kumar",
-    occupation: "4th Year CSE",
+    occupation: "Senior Coordinator",
     image: Arijit,
     linkedin: "https://www.linkedin.com/in/arijitajaykumar/",
     github: "https://github.com/techAkki-CMD",
     email: "arijitajay.kumar@gmail.com"
   },
-
   {
     name: "Nitesh Dixit",
-    occupation: "4th Year ECE",
+    occupation: "Senior Coordinator",
     image: Nitesh,
     linkedin: "https://www.linkedin.com/in/nitesh-kumar-680525290/",
     github: "https://github.com/FlopCoder35",
     email: "niteshdixit8957@gmail.com"
   },
+];
 
+const heads = [
+  {
+    name: "Lovepreet Singh",
+    occupation: "Head - Design & Content",
+    image: Lovepreet,
+    linkedin: "https://www.linkedin.com/in/lovepreetibis/",
+  },
   {
     name: "Chirag Singh",
-    occupation: "3rd Year CSE",
+    occupation: "Head - Web Development",
     image: Chirag,
     linkedin: "https://www.linkedin.com/in/chirag-singh-51a775324/",
     github: "https://github.com/Chiragsinghh",
@@ -48,7 +55,7 @@ const profiles = [
   },
   {
     name: "Uday Singh",
-    occupation: "3rd Year CSE",
+    occupation: "Head - Event Management",
     image: Uday,
     linkedin: "https://www.linkedin.com/in/uday-singh-17915b215/",
     github: "https://github.com/Immortal0006",
@@ -56,81 +63,56 @@ const profiles = [
   },
   {
     name: "Om Upadhyay",
-    occupation: "3rd Year CSE",
+    occupation: "Head - Alumni Relations",
     image: OM,
-    linkedin: "linkedin.com/in/om-upadhyay-7a235831b",
+    linkedin: "https://www.linkedin.com/in/om-upadhyay-7a235831b",
     email: "om12upadhyay@gmail.com"
   },
+];
 
-  {
-    name: "Lovepreet Singh",
-    occupation: "3rd Year AIDE",
-    image: Lovepreet,
-    linkedin: "https://www.linkedin.com/in/lovepreetibis/",
-  },
-
+const associates = [
   {
     name: "Amishka Srivastava",
-    occupation: "2nd Year CSE",
+    occupation: "Associate - Design & Content",
     image: Amishka,
     linkedin: "https://www.linkedin.com/in/amishka-srivastava-86055137b/",
     email: "srivastavaamishka@gmail.com"
   },
   {
+    name: "Aman Binodkumar Tiwari",
+    occupation: "Associate - Web Development",
+    image: Aman,
+    linkedin: "https://www.linkedin.com/in/aman-ktiwari",
+    email: "tamit9272@gmail.com"
+  },
+  {
     name: "Dhruvi Purohit",
-    occupation: "2nd Year CSE",
+    occupation: "Associate - Event Management",
     image: Dhruvi,
     linkedin: "http://linkedin.com/in/dhruvi-purohit-3b9a76381/",
   },
-
   {
-    name: "Shelly Negi",
-    occupation: "2nd Year ECE",
+    name: "Shelly",
+    occupation: "Associate - Social Media & Outreach",
     image: Shelly,
     linkedin: "https://www.linkedin.com/in/shelly-chaaras-b55b90383/",
     email: "shellychaaras@gmail.com"
   },
-
+  {
+    name: "S V S Chandan",
+    occupation: "Associate - Finance & Treasury",
+    image: Chandan,
+  },
   {
     name: "Kritarth Gupta",
-    occupation: "2nd Year ECE",
+    occupation: "Associate - Logistics & Operations",
     image: Kritharth,
     linkedin: "https://www.linkedin.com/in/kritarth-gupta-81ab21316/",
     email: "v.krith.05@gmail.com"
   },
-
-  {
-    name: "Chandan",
-    occupation: "2nd Year ECE",
-    image: Chandan,
-  },
-  {
-    name: "Aman Tiwari",
-    occupation: "2nd Year AIDE",
-    image: Aman,
-    linkedin: "linkedin.com/in/aman-ktiwari",
-    email: "tamit9272@gmail.com"
-  }
-
-
-
-
-
-
-
 ];
 
 const About = () => {
-  const teamMembers = [
-    { name: "John Doe", role: "Coordinator", image: "/path/to/image.jpg" },
-    {
-      name: "Jane Smith",
-      role: "Alumni Relations",
-      image: "/path/to/image.jpg",
-    },
-    // Add more team members as needed
-  ];
-
   return (
     <div className="w-full h-full overflow-x-hidden custom-scrollbar bg-gray-100">
       <Navbar />
@@ -210,7 +192,7 @@ const About = () => {
               Our Team
             </h2>
 
-            {/* Dean and Associate Dean Cards on the Same Level */}
+            {/* Dean and Associate Dean Cards */}
             <div className="flex justify-center items-center flex-col">
               <h3 className="text-2xl md:text-3xl font-semibold text-gray-700 mt-6">
                 Leadership
@@ -220,15 +202,13 @@ const About = () => {
               </p>
             </div>
             <div className="w-full flex justify-center items-center flex-wrap gap-8 mb-12">
-              {/* Dean's Card */}
               <ProfileCard
-                name="Dr. Manish Vashistha"
+                name="Dr. Sumit Kumar Sonkar"
                 occupation="Dean, Alumni and Industry Outreach"
-                image={Dean} // Using the same image as Associate Dean for now
-                linkedin="https://www.linkedin.com/in/example-dean/" // Placeholder
-                email="dean@iiitkota.ac.in" // Placeholder
+                image={sumitkumarsonkar}
+                linkedin="https://www.linkedin.com/in/sumit-sonkar-023721273/"
+                email="dean@iiitkota.ac.in"
               />
-              {/* Associate Dean's Card */}
               <ProfileCard
                 name="Dr. Chetna Sharma"
                 occupation="Associate Dean, Alumni and Industry Outreach"
@@ -238,12 +218,32 @@ const About = () => {
               />
             </div>
 
-            {/* Student Coordinators Subheading and Cards */}
-            <h3 className="text-2xl md:text-3xl font-semibold text-gray-700 mt-12">
-              Student Coordinators
+            {/* Senior Coordinators */}
+            <h3 className="text-2xl md:text-3xl font-semibold text-gray-700 mt-8">
+              Senior Coordinators
+            </h3>
+            <div className="w-full flex justify-center items-center flex-wrap gap-8 mb-8">
+              {seniorCoordinators.map((member, index) => (
+                <ProfileCard key={index} {...member} />
+              ))}
+            </div>
+
+            {/* Student Coordinators - Heads */}
+            <h3 className="text-2xl md:text-3xl font-semibold text-gray-700 mt-8">
+              Heads
+            </h3>
+            <div className="w-full flex justify-center items-center flex-wrap gap-8 mb-8">
+              {heads.map((member, index) => (
+                <ProfileCard key={index} {...member} />
+              ))}
+            </div>
+
+            {/* Student Coordinators - Associates */}
+            <h3 className="text-2xl md:text-3xl font-semibold text-gray-700 mt-8">
+              Associates
             </h3>
             <div className="w-full flex justify-center items-center flex-wrap gap-8">
-              {profiles.map((member, index) => (
+              {associates.map((member, index) => (
                 <ProfileCard key={index} {...member} />
               ))}
             </div>

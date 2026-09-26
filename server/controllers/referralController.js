@@ -37,13 +37,26 @@ exports.sendReferralRequest = async (req, res) => {
           return res.status(400).json({ message: 'Resume file could not be processed.' });
         }
 
-        uploadResult = await cloudinary.uploader.upload(uploadSource, {
+        const rawResult = await cloudinary.uploader.upload(uploadSource, {
           folder: 'iiitk-referral-resumes',
           resource_type: 'auto',
-          use_filename: true,
-          unique_filename: true,
+          flags: 'attachment:false',
           access_mode: 'public',
         });
+
+        let secureUrl = rawResult.secure_url;
+        if (secureUrl.startsWith('http:')) {
+          secureUrl = secureUrl.replace('http:', 'https:');
+        }
+        if (!secureUrl.toLowerCase().endsWith('.pdf')) {
+          secureUrl = `${secureUrl}.pdf`;
+        }
+
+        uploadResult = {
+          secure_url: secureUrl,
+          public_id: rawResult.public_id,
+          isLocal: false,
+        };
       } catch (uploadError) {
         console.error('Cloudinary upload failed, using local storage fallback:', uploadError);
       }
@@ -67,9 +80,16 @@ exports.sendReferralRequest = async (req, res) => {
           return res.status(400).json({ message: 'Resume file could not be processed.' });
         }
 
-        const hostUrl = `${req.protocol}://${req.get('host')}`;
+        const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : req.protocol) || 'http';
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        let baseUrl = process.env.SERVER_URL || process.env.BACKEND_URL || `${protocol}://${host}`;
+        baseUrl = baseUrl.replace(/\/$/, '');
+        if (!baseUrl.includes('localhost') && !baseUrl.includes('127.0.0.1') && baseUrl.startsWith('http:')) {
+          baseUrl = baseUrl.replace('http:', 'https:');
+        }
+
         uploadResult = {
-          secure_url: `${hostUrl}/uploads/resumes/${filename}`,
+          secure_url: `${baseUrl}/uploads/resumes/${filename}`,
           public_id: filename,
           isLocal: true,
         };
@@ -373,6 +393,35 @@ exports.getUnreadCount = async (req, res) => {
     return res.status(200).json({ count });
   } catch (error) {
     console.error('Error in getUnreadCount:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getResume = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const request = await ReferralRequest.findById(id);
+    if (!request || !request.resumeUrl) {
+      return res.status(404).json({ message: 'Resume not found' });
+    }
+
+    let resumeUrl = request.resumeUrl.trim();
+    if (request.isLocal || resumeUrl.includes('/uploads/resumes/')) {
+      const filename = path.basename(resumeUrl);
+      const filePath = path.join(__dirname, '../uploads/resumes', filename);
+      if (fs.existsSync(filePath)) {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename="resume.pdf"');
+        return res.sendFile(filePath);
+      }
+    }
+
+    if (resumeUrl.startsWith('http:') && !resumeUrl.includes('localhost') && !resumeUrl.includes('127.0.0.1')) {
+      resumeUrl = resumeUrl.replace('http:', 'https:');
+    }
+    return res.redirect(resumeUrl);
+  } catch (error) {
+    console.error('Error fetching resume:', error);
     return res.status(500).json({ message: 'Server error' });
   }
 };

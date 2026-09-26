@@ -25,6 +25,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 
 const app = express();
+app.set('trust proxy', 1);
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 7034;
 const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/alumni-portal";
@@ -75,7 +76,11 @@ mongoose
   .catch((err) => console.error("Failed to connect to MongoDB", err));
 
 app.use('/uploads/events', express.static(path.join(__dirname, 'uploads/events')));
-app.use('/uploads/resumes', express.static(path.join(__dirname, 'uploads/resumes')));
+app.use('/uploads/resumes', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline');
+  next();
+}, express.static(path.join(__dirname, 'uploads/resumes')));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/alumni", alumniRoutes);

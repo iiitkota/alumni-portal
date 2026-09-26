@@ -76,6 +76,8 @@ const SignUp = () => {
         branch = "CSE";
       } else if (branchCode === "kuec") {
         branch = "ECE";
+      } else if (branchCode === "kuad") {
+        branch = "AIDE";
       }
 
       // Calculate the graduation year (4 years after the start year)

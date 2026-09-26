@@ -198,7 +198,7 @@ const StudentSignUp = () => {
                     Student
                   </button>
                 </div>
-                
+
                 {/* Full Name */}
                 <div className="mb-4 w-full flex items-center max-md:justify-center">
                   <PersonIcon className="mr-2 text-[#19194D]" />
@@ -240,6 +240,7 @@ const StudentSignUp = () => {
                     <option value="" disabled>Select your Branch*</option>
                     <option value="CSE">CSE</option>
                     <option value="ECE">ECE</option>
+                    <option value="ECE">AIDE</option>
                   </select>
                 </div>
 

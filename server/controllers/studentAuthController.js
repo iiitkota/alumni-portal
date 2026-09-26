@@ -4,14 +4,13 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
 const getTransporter = () => {
+  const user = (process.env.EMAIL_USER || process.env.MAIL_USER || '').trim();
+  const pass = (process.env.EMAIL_PASS || process.env.MAIL_PASS || '').replace(/\s+/g, '');
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
-    auth: {
-      user: process.env.EMAIL_USER || process.env.MAIL_USER,
-      pass: process.env.EMAIL_PASS || process.env.MAIL_PASS,
-    },
+    auth: { user, pass },
     tls: {
       rejectUnauthorized: false
     }
